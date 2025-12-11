@@ -37,7 +37,7 @@
       .m-card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box; }
       .m-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 20px; color: #0f172a; text-align: center; letter-spacing: -0.5px; }
       
-      .m-input { width: 100%; padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; font-size: 1.2rem; text-align: center; box-sizing: border-box; transition: 0.2s; background: #f8fafc; color: #333; }
+      .m-input { width: 100%; padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; font-size: 1.1rem; text-align: center; box-sizing: border-box; transition: 0.2s; background: #f8fafc; color: #333; }
       .m-input:focus { border-color: #2563eb; background: #fff; outline: none; }
       
       .m-btn { width: 100%; padding: 16px; background: #2563eb; color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3); }
@@ -82,7 +82,8 @@
     <div id="screen-connect" class="mobile-container hidden">
         <div class="m-card fade-in">
             <h1 class="m-title">리모컨 연결</h1>
-            <input type="number" id="input-room-code" class="m-input" placeholder="PC 코드 4자리" inputmode="numeric">
+            <p class="m-desc">PC 화면의 4자리 코드를 입력하세요</p>
+            <input type="number" id="input-room-code" class="m-input" placeholder="코드 (예: 1234)" inputmode="numeric">
             <button id="btn-connect-pc" class="m-btn">연결하기</button>
         </div>
     </div>
@@ -90,9 +91,14 @@
     <div id="screen-login" class="mobile-container hidden">
         <div class="m-card fade-in">
             <h1 class="m-title">학생 로그인</h1>
+            <p class="m-desc">본인의 학번과 비밀번호를 입력하세요</p>
+            
             <input type="tel" id="input-student-id" class="m-input" placeholder="학번 (예: 1201)" maxlength="4">
-            <button id="btn-login" class="m-btn">입장하기</button>
+            <input type="password" id="input-student-pw" class="m-input" placeholder="비밀번호" maxlength="10">
+            
+            <button id="btn-login" class="m-btn">로그인</button>
         </div>
+        <p style="text-align:center; color:#94a3b8; font-size:0.8rem; margin-top:20px;">초기 비밀번호: 1234</p>
     </div>
 
     <div id="screen-dashboard" class="mobile-container hidden">
@@ -123,26 +129,30 @@
 
     <script>
         // ==========================================
-        // [설정] 학생 명단 (1201 ~ 1232)
+        // [설정] 학생 명단 (학번 : {이름, 비번})
+        // 초기 비밀번호는 모두 '1234'로 설정됨
         // ==========================================
-        const STUDENT_DATA = [
-            { id: '1201', name: '구민찬' }, { id: '1202', name: '권재현' }, { id: '1203', name: '김민채' },
-            { id: '1204', name: '김보경' }, { id: '1205', name: '김채경' }, { id: '1206', name: '나기찬' },
-            { id: '1207', name: '박근우' }, { id: '1208', name: '박서윤' }, { id: '1209', name: '박서현' },
-            { id: '1210', name: '박소율' }, { id: '1211', name: '박시하' }, { id: '1212', name: '박재윤' },
-            { id: '1213', name: '박초연' }, { id: '1214', name: '양세린' }, { id: '1215', name: '엄로이' },
-            { id: '1216', name: '유승후' }, { id: '1217', name: '이규원' }, { id: '1218', name: '이나경' },
-            { id: '1219', name: '이예준' }, { id: '1220', name: '이지원' }, { id: '1221', name: '정이현' },
-            { id: '1222', name: '정태겸' }, { id: '1223', name: '조민서' }, { id: '1224', name: '조율희' },
-            { id: '1225', name: '지아림' }, { id: '1226', name: '최예진' }, { id: '1227', name: '최유혁' },
-            { id: '1228', name: '하시은' }, { id: '1229', name: '한진환' }, { id: '1230', name: '허유정' },
-            { id: '1232', name: '김범준' }
-        ];
-
-        // P2P 통신 설정 (구글 STUN 서버 사용)
-        const peerConfig = {
-            config: { 'iceServers': [ { urls: 'stun:stun.l.google.com:19302' } ] }
+        const STUDENT_DB = {
+            '1201': { name: '구민찬', pw: '1234' }, '1202': { name: '권재현', pw: '1234' },
+            '1203': { name: '김민채', pw: '1234' }, '1204': { name: '김보경', pw: '1234' },
+            '1205': { name: '김채경', pw: '1234' }, '1206': { name: '나기찬', pw: '1234' },
+            '1207': { name: '박근우', pw: '1234' }, '1208': { name: '박서윤', pw: '1234' },
+            '1209': { name: '박서현', pw: '1234' }, '1210': { name: '박소율', pw: '1234' },
+            '1211': { name: '박시하', pw: '1234' }, '1212': { name: '박재윤', pw: '1234' },
+            '1213': { name: '박초연', pw: '1234' }, '1214': { name: '양세린', pw: '1234' },
+            '1215': { name: '엄로이', pw: '1234' }, '1216': { name: '유승후', pw: '1234' },
+            '1217': { name: '이규원', pw: '1234' }, '1218': { name: '이나경', pw: '1234' },
+            '1219': { name: '이예준', pw: '1234' }, '1220': { name: '이지원', pw: '1234' },
+            '1221': { name: '정이현', pw: '1234' }, '1222': { name: '정태겸', pw: '1234' },
+            '1223': { name: '조민서', pw: '1234' }, '1224': { name: '조율희', pw: '1234' },
+            '1225': { name: '지아림', pw: '1234' }, '1226': { name: '최예진', pw: '1234' },
+            '1227': { name: '최유혁', pw: '1234' }, '1228': { name: '하시은', pw: '1234' },
+            '1229': { name: '한진환', pw: '1234' }, '1230': { name: '허유정', pw: '1234' },
+            '1232': { name: '김범준', pw: '1234' }
         };
+
+        // P2P 통신 설정
+        const peerConfig = { config: { 'iceServers': [ { urls: 'stun:stun.l.google.com:19302' } ] } };
 
         const urlParams = new URLSearchParams(window.location.search);
         const isMobile = urlParams.get('mode') === 'mobile';
@@ -174,17 +184,24 @@
                 });
             };
 
-            // 2. 로그인
+            // 2. 로그인 (학번 + 비밀번호 체크)
             document.getElementById('btn-login').onclick = () => {
                 const inputId = document.getElementById('input-student-id').value.trim();
-                const student = STUDENT_DATA.find(s => s.id === inputId);
+                const inputPw = document.getElementById('input-student-pw').value.trim();
+                
+                const student = STUDENT_DB[inputId];
 
                 if (student) {
-                    myName = student.name;
-                    myId = student.id;
-                    document.getElementById('user-name-display').innerText = myName;
-                    document.getElementById('user-id-display').innerText = myId;
-                    showScreen('screen-dashboard');
+                    if (student.pw === inputPw) {
+                        // 로그인 성공
+                        myName = student.name;
+                        myId = inputId;
+                        document.getElementById('user-name-display').innerText = myName;
+                        document.getElementById('user-id-display').innerText = myId;
+                        showScreen('screen-dashboard');
+                    } else {
+                        alert("비밀번호가 일치하지 않습니다.");
+                    }
                 } else {
                     alert("명단에 없는 학번입니다.");
                 }
@@ -197,11 +214,12 @@
                 let reason = "";
                 let displayLoc = "";
 
+                // 버튼별 텍스트 및 사유 자동 설정
                 if(locationType === 'room') displayLoc = "교실";
-                else if(locationType === 'afterschool') displayLoc = "방과후";
-                else if(locationType === 'club') displayLoc = "동아리";
-                else if(locationType === 'early') displayLoc = "조기입실/결석";
-                else if(locationType === 'restroom') displayLoc = "화장실/정수기";
+                else if(locationType === 'afterschool') { displayLoc = "방과후"; }
+                else if(locationType === 'club') { displayLoc = "동아리"; }
+                else if(locationType === 'early') { displayLoc = "조기입실/결석"; }
+                else if(locationType === 'restroom') { displayLoc = "화장실/정수기"; }
                 else if(locationType === 'etc') {
                     reason = prompt("기타 사유 입력");
                     if (!reason) return;
@@ -217,6 +235,7 @@
             document.getElementById('btn-logout').onclick = () => {
                 showScreen('screen-login');
                 document.getElementById('input-student-id').value = '';
+                document.getElementById('input-student-pw').value = '';
             };
 
             function showScreen(id) {
@@ -241,21 +260,29 @@
                 document.getElementById('pc-status-msg').innerText = "🟢 폰과 연결됨!";
                 connection.on('data', (data) => {
                     if (data.type === 'move') {
-                        let targetLane = 'etc'; // 기본값 (없는 레인은 여기로 보냄)
+                        let targetLane = 'etc'; // 기본값 (안전빵)
                         let reasonText = "";
 
-                        // [장소 매핑 로직]
+                        // [장소 매핑 및 자석 찾기 로직]
                         if (data.target === 'room') {
-                            targetLane = 'room'; // 교실은 실제 레인 있음
+                            targetLane = 'room'; 
                         } else if (data.target === 'restroom') {
                             targetLane = 'toilet'; // 화장실은 보통 toilet 레인 사용
                         } else {
-                            // 방과후, 동아리, 조기입실 등은 'etc'로 보내고 라벨 붙임
-                            targetLane = 'etc';
-                            if (data.target === 'afterschool') reasonText = "방과후";
-                            else if (data.target === 'club') reasonText = "동아리";
-                            else if (data.target === 'early') reasonText = "조기/결석";
-                            else if (data.target === 'etc') reasonText = data.reason;
+                            // 방과후, 동아리, 조기입실 등
+                            // PC 화면에 해당 data-lane이 있는지 확인
+                            const laneExists = document.querySelector(`div[data-lane="${data.target}"]`);
+                            
+                            if (laneExists) {
+                                targetLane = data.target; // 있으면 거기로 보냄
+                            } else {
+                                // ★ 없으면 'etc'로 보내고 사유를 붙임 (안전 장치) ★
+                                targetLane = 'etc';
+                                if (data.target === 'afterschool') reasonText = "방과후";
+                                else if (data.target === 'club') reasonText = "동아리";
+                                else if (data.target === 'early') reasonText = "조기/결석";
+                                else if (data.target === 'etc') reasonText = data.reason;
+                            }
                         }
 
                         // 자석 이동 실행
@@ -265,29 +292,40 @@
                 connection.on('close', () => { document.getElementById('pc-status-msg').innerText = "🔴 연결 끊김"; });
             });
 
-            // [똑똑한 자석 이동 함수] 1201 -> 구민찬 또는 1번 찾기
+            // [똑똑한 자석 이동 함수]
             function moveMagnetSmart(studentName, studentId, targetLane, reason) {
+                // 1. 번호 계산 (1201 -> 1)
+                const seatNumber = studentId ? (parseInt(studentId) - 1200) : null;
+
+                // [중요] 원본 script.js의 Be 함수 호출 시도
+                // (DOM에 직접 접근하기보다 원본 로직을 태우는 게 가장 안전함)
+                
+                // Be 함수가 전역에 노출되어 있는지 확인 (보통 안 되어있음)
+                // 따라서 DOM 조작 방식으로 진행하되, Be 함수 로직을 흉내냄
+                
+                // 2. 자석 찾기
                 const chips = document.querySelectorAll('.chip');
                 let targetChip = null;
 
-                // 1. 이름으로 찾기 ("구민찬")
+                // (1) 이름으로 찾기
                 chips.forEach(chip => {
                     if (chip.innerText.includes(studentName)) targetChip = chip;
                 });
 
-                // 2. 이름으로 못 찾으면 번호로 찾기 (1201 -> "1")
-                if (!targetChip && studentId) {
-                    const seatNumber = parseInt(studentId) - 1200; // 1201 -> 1
+                // (2) 못 찾으면 번호로 찾기
+                if (!targetChip && seatNumber) {
                     chips.forEach(chip => {
-                        // 칩 텍스트가 정확히 숫자만 있거나, "1 " 처럼 되어있을 수 있음
                         if (chip.innerText.trim() === String(seatNumber)) targetChip = chip;
                     });
                 }
 
                 if (targetChip) {
-                    // 목적지 찾기 (script.js의 data-lane 활용)
+                    // 원래 로직(Be 함수) 대신 직접 DOM 이동 (가장 확실함)
+                    
+                    // 목적지 컨테이너 찾기
                     let destContainer = document.querySelector(`div[data-lane="${targetLane}"]`);
                     // .lane 내부의 실제 컨테이너(보통 마지막 div) 잡기
+                    // 구조: <div class="lane" data-lane="room"> <div title>...</div> <div content>...</div> </div>
                     const realDest = destContainer ? (destContainer.querySelector('div:last-child') || destContainer) : null;
 
                     if (realDest) {
@@ -306,6 +344,8 @@
                             if (badge) badge.remove();
                         }
                     }
+                } else {
+                    console.log("자석을 찾을 수 없음:", studentName, studentId);
                 }
             }
 
