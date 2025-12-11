@@ -179,11 +179,21 @@
             { loc: "기숙사", name: "학봉관/우정" }, { loc: "", name: "미술실" },
         ];
 
-        // [설정 2] BGM 목록
+// [설정 2] BGM 목록 (여기만 수정하면 됩니다!)
         const BGM_LIST = [
-            { title: "Cozy Winter", desc: "따뜻하고 편안한 느낌", cover: "https://images.unsplash.com/photo-1542317854-f9eb6d3e34b9?w=100", src: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Carefree.mp3" },
-            { title: "Snowy Jazz", desc: "눈 내리는 날의 재즈", cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100", src: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Airport%20Lounge.mp3" },
-            { title: "Study Lofi", desc: "집중하기 좋은 비트", cover: "https://images.unsplash.com/photo-1516280440614-6697288d5d38?w=100", src: "https://incompetech.com/music/royalty-free/mp3-royaltyfree/Lobby%20Time.mp3" }
+            { 
+                title: "내가 좋아하는 노래",      // 노래 제목
+                desc: "신나는 케이팝",           // 노래 설명 (작게 나옴)
+                cover: "./assets/cover.jpg",   // 앨범 커버 이미지 경로 (또는 인터넷 주소)
+                src: "./assets/music.mp3"      // 음악 파일 경로 (또는 인터넷 주소)
+            },
+            { 
+                title: "잔잔한 피아노", 
+                desc: "공부할 때 듣는 노래", 
+                cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100", // 이미지는 인터넷 주소 써도 됨
+                src: "./assets/piano.mp3" 
+            },
+            // 필요한 만큼 { ... } 덩어리를 복사해서 추가하세요
         ];
 
         // [설정 3] 사유 관련
