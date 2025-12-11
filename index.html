@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>학습 장소 현황판</title>
     
-    <link rel="stylesheet" crossorigin href="./style.css">
+    <link rel="stylesheet" crossorigin href="./index-D-SKl4xE.css">
     <script type="module" crossorigin src="./script.js"></script>
     
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
@@ -13,8 +13,6 @@
     <style>
       /* [1] 공통 및 PC 화면 스타일 */
       #snow-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; pointer-events: none; }
-      
-      /* 불필요한 요소 숨김 */
       .form, .notice, .aside-announcement, ul.notice-ul:not(#my-custom-list) { display: none !important; }
 
       /* PC 왼쪽 하단 연결 코드 표시 */
@@ -26,41 +24,37 @@
       }
       #connection-display h3 { margin: 0 0 5px 0; font-size: 0.9rem; color: #aaa; }
       #room-id-text { font-size: 1.8rem; font-weight: bold; color: #5ac4ff; letter-spacing: 2px; }
+      #pc-status-msg { font-size: 0.8rem; color: #00ff88; margin-top: 5px; }
 
-      /* [2] 모바일 리모컨 전용 스타일 (React 디자인 재현) */
-      body.mobile-mode { background: #f0f2f5; color: #333; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; height: 100vh; overflow: hidden; margin: 0; }
+      /* [2] 모바일 리모컨 전용 스타일 */
+      body.mobile-mode { background: #f0f2f5; color: #333; font-family: -apple-system, sans-serif; height: 100vh; overflow: hidden; margin: 0; }
       body.mobile-mode #app, body.mobile-mode #snow-canvas, body.mobile-mode #connection-display { display: none !important; }
 
       .mobile-container { max-width: 450px; margin: 0 auto; height: 100%; padding: 20px; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; }
-      
-      /* 카드 디자인 */
-      .m-card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); margin-bottom: 16px; width: 100%; box-sizing: border-box; }
-      .m-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; color: #111; }
-      .m-desc { color: #666; font-size: 0.9rem; margin-bottom: 20px; }
-      
-      /* 입력창 */
-      .m-label { display: block; font-size: 0.9rem; font-weight: 500; margin-bottom: 6px; color: #333; }
-      .m-input { width: 100%; padding: 10px 12px; border: 1px solid #e2e8f0; border-radius: 6px; margin-bottom: 16px; font-size: 1rem; box-sizing: border-box; }
-      .m-input:focus { outline: none; border-color: #000; ring: 2px solid #ddd; }
-
-      /* 버튼 */
-      .m-btn { width: 100%; padding: 12px; background: #000; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: 0.2s; }
-      .m-btn:disabled { background: #ccc; cursor: not-allowed; }
-      .m-btn:active { transform: scale(0.98); }
-      .m-btn.outline { background: white; border: 1px solid #e2e8f0; color: #0f172a; margin-top: 8px; }
-
-      /* 상태 표시 */
-      .status-box { text-align: center; padding: 15px; border: 1px solid #e2e8f0; border-radius: 8px; margin-bottom: 20px; background: #f8fafc; }
-      .status-text { font-size: 1.1rem; font-weight: 600; color: #0f172a; }
-      
-      /* 버튼 그리드 */
-      .loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-      .loc-btn { padding: 16px; border: 1px solid #e2e8f0; background: white; border-radius: 8px; font-weight: 500; cursor: pointer; transition: 0.2s; color: #333; }
-      .loc-btn.active { background: #000; color: white; border-color: #000; }
-      
-      /* 화면 전환 애니메이션 */
       .hidden { display: none !important; }
       .fade-in { animation: fadeIn 0.5s ease; }
+
+      /* 카드 및 입력창 */
+      .m-card { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 16px; width: 100%; box-sizing: border-box; }
+      .m-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 20px; color: #111; text-align: center; }
+      .m-input { width: 100%; padding: 14px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; font-size: 1.1rem; box-sizing: border-box; text-align: center; }
+      .m-btn { width: 100%; padding: 15px; background: #000; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; transition: 0.2s; }
+      .m-btn:active { transform: scale(0.98); }
+
+      /* 상태 표시 및 버튼 그리드 */
+      .status-box { text-align: center; padding: 15px; background: #eef2ff; border-radius: 8px; margin-bottom: 20px; border: 1px solid #c7d2fe; }
+      .status-text { font-size: 1.2rem; font-weight: 700; color: #3730a3; }
+      
+      .loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      .loc-btn { 
+          padding: 20px 10px; border: 1px solid #e2e8f0; background: white; 
+          border-radius: 12px; font-weight: 600; cursor: pointer; color: #333;
+          font-size: 1rem; display: flex; flex-direction: column; align-items: center; gap: 5px;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      }
+      .loc-btn:active { background: #f1f5f9; transform: scale(0.98); }
+      .loc-btn.active { background: #333; color: white; border-color: #333; }
+
       @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
   </head>
@@ -72,57 +66,43 @@
     <div id="connection-display" style="display: none;">
         <h3>🔗 리모컨 접속 코드</h3>
         <div id="room-id-text">...</div>
+        <div id="pc-status-msg">대기 중...</div>
     </div>
 
     <div id="screen-connect" class="mobile-container hidden">
         <div class="m-card fade-in">
-            <h1 class="m-title">리모컨 연결</h1>
-            <p class="m-desc">PC 화면 좌측 하단의 코드를 입력하세요.</p>
-            
-            <label class="m-label">접속 코드 (4자리)</label>
-            <input type="number" id="input-room-code" class="m-input" placeholder="예: 1234">
-            
+            <h1 class="m-title">🔗 리모컨 연결</h1>
+            <input type="number" id="input-room-code" class="m-input" placeholder="PC 화면의 코드 4자리">
             <button id="btn-connect-pc" class="m-btn">연결하기</button>
         </div>
     </div>
 
     <div id="screen-login" class="mobile-container hidden">
         <div class="m-card fade-in">
-            <h1 class="m-title">로그인</h1>
-            <p class="m-desc">본인의 학번을 입력해주세요.</p>
-            
-            <label class="m-label">학번</label>
-            <input type="text" id="input-student-id" class="m-input" placeholder="예: 1201">
-            
-            <button id="btn-login" class="m-btn">로그인</button>
+            <h1 class="m-title">학생 로그인</h1>
+            <input type="tel" id="input-student-id" class="m-input" placeholder="학번 (예: 1201)" maxlength="4">
+            <button id="btn-login" class="m-btn">입장하기</button>
         </div>
-        <p style="text-align:center; color:#999; font-size:0.8rem;">made by 조율희/제미나이</p>
     </div>
 
     <div id="screen-dashboard" class="mobile-container hidden">
-        <div class="m-card fade-in" style="margin-bottom: 10px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <div>
-                    <h2 class="m-title" style="font-size:1.2rem; margin:0;" id="user-name-display">홍길동</h2>
-                    <span style="font-size:0.85rem; color:#666;" id="user-id-display">1234</span>
-                </div>
-                <button id="btn-logout" style="background:none; border:none; color:#666; font-size:0.85rem; cursor:pointer; text-decoration:underline;">로그아웃</button>
-            </div>
-        </div>
-
         <div class="m-card fade-in">
-            <h3 class="m-label" style="font-size:1rem;">현재 상태</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <span style="font-weight:bold; font-size:1.2rem;" id="user-name-display">이름</span>
+                <button id="btn-logout" style="background:none; border:none; color:#666; text-decoration:underline; cursor:pointer;">나가기</button>
+            </div>
+
             <div class="status-box">
+                <div style="font-size:0.8rem; color:#666; margin-bottom:5px;">현재 상태</div>
                 <span id="current-status-text" class="status-text">교실</span>
             </div>
 
-            <h3 class="m-label" style="font-size:1rem;">위치 이동</h3>
             <div class="loc-grid">
                 <button class="loc-btn" onclick="sendMove('room')">🏫 교실</button>
-                <button class="loc-btn" onclick="sendMove('toilet')">🚽 화장실</button>
-                <button class="loc-btn" onclick="sendMove('water')">💧 식수</button>
-                <button class="loc-btn" onclick="sendMove('health')">💊 보건실</button>
-                <button class="loc-btn" onclick="sendMove('mood')">✨ 기분전환</button>
+                <button class="loc-btn" onclick="sendMove('afterschool')">📚 방과후</button>
+                <button class="loc-btn" onclick="sendMove('club')">⚽ 동아리</button>
+                <button class="loc-btn" onclick="sendMove('early')">🏃 조기입실/결석</button>
+                <button class="loc-btn" onclick="sendMove('restroom')">🚽 화장실/정수기</button>
                 <button class="loc-btn" onclick="sendMove('etc')">🎸 기타</button>
             </div>
         </div>
@@ -130,7 +110,7 @@
 
     <script>
         // ==========================================
-        // [설정] 학생 명단 데이터 (1201 ~ 1232)
+        // [1] 학생 명단 (1201 ~ 1232)
         // ==========================================
         const STUDENT_DATA = [
             { id: '1201', name: '구민찬' }, { id: '1202', name: '권재현' }, { id: '1203', name: '김민채' },
@@ -147,17 +127,23 @@
         ];
 
         // ==========================================
-        // [로직] PeerJS 및 화면 제어
+        // [2] 통신 설정 (PeerJS + STUN Server)
         // ==========================================
-        
-        // URL 파라미터 확인 (?mode=mobile)
+        const peerConfig = {
+            debug: 2,
+            config: {
+                'iceServers': [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:global.stun.twilio.com:3478' }
+                ]
+            }
+        };
+
         const urlParams = new URLSearchParams(window.location.search);
         const isMobile = urlParams.get('mode') === 'mobile';
-
         let peer = null;
         let conn = null;
         let myName = "";
-        let myId = "";
 
         // ----------------------------------------------------------------
         // [A] 모바일 리모컨 로직
@@ -166,92 +152,91 @@
             document.body.classList.add('mobile-mode');
             showScreen('screen-connect');
 
-            // 1. PC 연결하기
+            // 연결 버튼 클릭
             document.getElementById('btn-connect-pc').onclick = () => {
                 const code = document.getElementById('input-room-code').value.trim();
-                if (code.length !== 4) return alert("4자리 코드를 입력해주세요.");
+                if (code.length < 3) return alert("코드를 확인해주세요.");
 
-                // PeerJS 초기화 (서버 없이 연결)
-                peer = new Peer();
+                // PeerJS 초기화
+                peer = new Peer(peerConfig);
                 
                 peer.on('open', () => {
-                    // PC에게 연결 요청
+                    document.getElementById('btn-connect-pc').innerText = "연결 중...";
                     conn = peer.connect(`dimiboard-${code}`);
 
                     conn.on('open', () => {
-                        // 연결 성공
-                        showScreen('screen-login');
+                        showScreen('screen-login'); // 성공 시 로그인 화면으로
                     });
 
-                    conn.on('error', () => {
-                        alert("연결 실패! 코드를 다시 확인해주세요.");
+                    conn.on('error', (err) => {
+                        alert("연결 실패! 코드를 다시 확인하거나 PC를 새로고침하세요.");
+                        document.getElementById('btn-connect-pc').innerText = "연결하기";
                     });
                     
-                    // 연결 끊김 처리
                     conn.on('close', () => {
-                        alert("PC와 연결이 끊어졌습니다.");
+                        alert("연결이 끊어졌습니다.");
                         location.reload();
                     });
                 });
+                
+                peer.on('error', (err) => {
+                    alert("통신 오류: " + err.type);
+                    document.getElementById('btn-connect-pc').innerText = "연결하기";
+                });
             };
 
-            // 2. 로그인 처리
+            // 로그인 버튼 클릭
             document.getElementById('btn-login').onclick = () => {
                 const inputId = document.getElementById('input-student-id').value.trim();
                 const student = STUDENT_DATA.find(s => s.id === inputId);
 
                 if (student) {
                     myName = student.name;
-                    myId = student.id;
-                    
-                    // 화면 갱신
-                    document.getElementById('user-name-display').innerText = myName;
-                    document.getElementById('user-id-display').innerText = myId;
+                    document.getElementById('user-name-display').innerText = `${student.name} (${student.id})`;
                     showScreen('screen-dashboard');
                 } else {
                     alert("명단에 없는 학번입니다.");
                 }
             };
 
-            // 3. 이동 명령 전송
+            // 이동 명령 전송
             window.sendMove = function(locationType) {
-                if (!conn) return alert("연결이 끊어졌습니다.");
+                if (!conn || !conn.open) return alert("PC와 연결이 끊어졌습니다.");
                 
                 let reason = "";
-                // 기타 선택 시 사유 입력 (간단하게 prompt 사용, 원하면 모달로 변경 가능)
-                if (locationType === 'etc') {
-                    reason = prompt("기타 사유를 입력하세요 (예: 상담, 심부름)");
-                    if (!reason) return; // 취소하면 전송 안함
+                let displayLoc = "";
+
+                // 버튼별 텍스트 매핑
+                if(locationType === 'room') displayLoc = "교실";
+                else if(locationType === 'afterschool') displayLoc = "방과후";
+                else if(locationType === 'club') displayLoc = "동아리";
+                else if(locationType === 'early') displayLoc = "조기입실/결석";
+                else if(locationType === 'restroom') displayLoc = "화장실/정수기";
+                else if(locationType === 'etc') {
+                    reason = prompt("기타 사유를 입력하세요 (예: 상담)");
+                    if (!reason) return; // 취소
+                    displayLoc = `기타 (${reason})`;
                 }
 
-                // UI 업데이트
-                document.getElementById('current-status-text').innerText = 
-                    locationType === 'room' ? '교실' : 
-                    locationType === 'etc' ? `기타 (${reason})` : locationType;
+                document.getElementById('current-status-text').innerText = displayLoc;
 
-                // 버튼 스타일 활성화 (시각적 효과)
-                document.querySelectorAll('.loc-btn').forEach(btn => btn.classList.remove('active'));
-                event.target.classList.add('active');
-
-                // 데이터 전송
+                // PC로 데이터 전송
                 conn.send({
                     type: 'move',
                     name: myName,
-                    id: myId,
                     target: locationType,
                     reason: reason
                 });
             };
 
-            // 로그아웃
             document.getElementById('btn-logout').onclick = () => {
                 showScreen('screen-login');
                 document.getElementById('input-student-id').value = '';
             };
 
-            function showScreen(screenId) {
+            function showScreen(id) {
                 document.querySelectorAll('.mobile-container').forEach(el => el.classList.add('hidden'));
-                document.getElementById(screenId).classList.remove('hidden');
+                document.getElementById(id).classList.remove('hidden');
             }
         } 
         
@@ -259,162 +244,127 @@
         // [B] PC 현황판 로직
         // ----------------------------------------------------------------
         else {
-            // 1. 랜덤 방 코드 생성 (1000~9999)
+            // 랜덤 코드 생성
             const roomCode = Math.floor(1000 + Math.random() * 9000);
             
             // PeerJS 초기화 (고정 ID 사용)
-            peer = new Peer(`dimiboard-${roomCode}`);
+            peer = new Peer(`dimiboard-${roomCode}`, peerConfig);
 
             peer.on('open', (id) => {
                 document.getElementById('connection-display').style.display = 'block';
                 document.getElementById('room-id-text').innerText = roomCode;
-                console.log("My Peer ID is: " + id);
             });
 
-            // 폰에서 연결이 들어오면
             peer.on('connection', (connection) => {
+                document.getElementById('pc-status-msg').innerText = "🟢 폰과 연결됨!";
+                
                 connection.on('data', (data) => {
                     if (data.type === 'move') {
-                        console.log("이동 요청:", data);
-                        // 실제 자석 이동 함수 호출
-                        moveMagnetByName(data.name, data.target, data.reason);
+                        // ★ 여기서 자석을 이동시킵니다 ★
+                        // 요청하신 목록: ['room', 'afterschool', 'club', 'early', 'restroom', 'etc']
+                        // PC의 기존 script.js가 이 레인들을 지원하지 않을 수 있으므로
+                        // 기존에 존재하는 레인으로 매핑하거나, 'etc'로 보내되 사유에 표시합니다.
+                        
+                        let targetLane = data.target;
+                        let reasonText = data.reason;
+
+                        // [매핑 로직] PC에 해당 레인이 없으면 'etc'나 'toilet' 등으로 우회
+                        // 1. 방과후/동아리/조기입실 -> script.js에 레인이 없으면 'etc'로 보내고 사유에 적음
+                        if (['afterschool', 'club', 'early'].includes(targetLane)) {
+                            // 만약 'afterschool' 레인이 PC에 없다면:
+                            if (!document.querySelector(`div[data-lane="${targetLane}"]`)) {
+                                targetLane = 'etc'; 
+                                let label = (data.target === 'afterschool') ? '방과후' : 
+                                            (data.target === 'club') ? '동아리' : '조기입실/결석';
+                                reasonText = label; 
+                            }
+                        }
+                        // 2. 화장실/정수기 -> 'toilet' 또는 'water' (보통 toilet 사용)
+                        if (targetLane === 'restroom') targetLane = 'toilet';
+
+                        moveMagnetByName(data.name, targetLane, reasonText);
                     }
+                });
+                
+                connection.on('close', () => {
+                    document.getElementById('pc-status-msg').innerText = "🔴 연결 끊김";
                 });
             });
 
-            // [핵심] 자석 이동 함수
+            // 자석 이동 함수
             function moveMagnetByName(studentName, targetLane, reason) {
                 const chips = document.querySelectorAll('.chip');
                 let targetChip = null;
 
-                // 이름으로 칩 찾기
                 chips.forEach(chip => {
-                    if (chip.innerText.includes(studentName)) {
-                        targetChip = chip;
-                    }
+                    if (chip.innerText.includes(studentName)) targetChip = chip;
                 });
 
                 if (targetChip) {
-                    // 목적지 찾기 (기존 script.js 구조 활용)
-                    // data-lane 속성을 가진 div 찾기
-                    let targetContainer = document.querySelector(`div[data-lane="${targetLane}"]`);
-                    
-                    // 만약 data-lane이 없으면 클래스로 찾기 시도 (예: toilet 등)
-                    if (!targetContainer) {
-                        // script.js 로직에 맞춰 레인 매핑이 필요할 수 있음.
-                        // 여기서는 data-lane 속성이 있다고 가정하고 진행.
-                        // 만약 없다면 script.js의 구조를 확인해야 함.
-                    }
-
-                    // 보통 lane 안의 내용물 div가 따로 있음. (마지막 자식 요소 등)
+                    // 목적지 찾기
+                    const targetContainer = document.querySelector(`div[data-lane="${targetLane}"]`);
+                    // .lane 내부의 컨테이너(보통 두번째 div) 찾기
                     const dest = targetContainer ? (targetContainer.querySelector('div:last-child') || targetContainer) : null;
 
                     if (dest) {
                         dest.appendChild(targetChip);
                         
-                        // 사유(reason) 처리
-                        let reasonBadge = targetChip.querySelector('.reason-badge');
-                        if (targetLane === 'etc' && reason) {
-                            if (!reasonBadge) {
-                                reasonBadge = document.createElement('div');
-                                reasonBadge.className = 'reason-badge';
-                                reasonBadge.style.fontSize = '0.6rem';
-                                reasonBadge.style.color = '#ff6b6b';
-                                reasonBadge.style.marginTop = '2px';
-                                targetChip.appendChild(reasonBadge);
+                        // 사유 태그 표시/제거
+                        let reasonTag = targetChip.querySelector('.reason-badge');
+                        if (reason) {
+                            if (!reasonTag) {
+                                reasonTag = document.createElement('div');
+                                reasonTag.className = 'reason-badge';
+                                reasonTag.style.cssText = "font-size:0.7rem; color:#ff6b6b; margin-top:2px;";
+                                targetChip.appendChild(reasonTag);
                             }
-                            reasonBadge.innerText = reason;
+                            reasonTag.innerText = reason;
                         } else {
-                            if (reasonBadge) reasonBadge.remove();
+                            if (reasonTag) reasonTag.remove();
                         }
                     }
                 }
             }
 
-            // -----------------------------------------------
-            // 눈 내리는 효과 (PC만 적용)
-            // -----------------------------------------------
+            // [기타] 눈 내리는 효과 등 기존 로직
             (function() {
                 const canvas = document.getElementById('snow-canvas');
                 const ctx = canvas.getContext('2d');
-                let width = window.innerWidth;
-                let height = window.innerHeight;
+                let width = window.innerWidth, height = window.innerHeight;
                 canvas.width = width; canvas.height = height;
                 const flakes = [];
-                for(let i=0; i<100; i++) flakes.push({x: Math.random()*width, y: Math.random()*-height, r: Math.random()*2+1, s: Math.random()*1+0.5, o: Math.random()*0.5+0.3});
-                
+                for(let i=0; i<100; i++) flakes.push({x:Math.random()*width,y:Math.random()*-height,r:Math.random()*2+1,s:Math.random()+0.5,o:Math.random()*0.5+0.3});
                 function draw() {
-                    ctx.clearRect(0, 0, width, height);
-                    ctx.fillStyle = 'rgba(255,255,255,0.8)';
-                    ctx.beginPath();
-                    flakes.forEach(f => {
-                        ctx.globalAlpha = f.o; ctx.moveTo(f.x, f.y); ctx.arc(f.x, f.y, f.r, 0, Math.PI*2);
-                        f.y += f.s;
-                        if(f.y > height) { f.y = -5; f.x = Math.random() * width; }
-                    });
-                    ctx.fill();
-                    requestAnimationFrame(draw);
+                    ctx.clearRect(0,0,width,height);
+                    ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.beginPath();
+                    flakes.forEach(f=>{
+                        ctx.globalAlpha=f.o; ctx.moveTo(f.x,f.y); ctx.arc(f.x,f.y,f.r,0,Math.PI*2);
+                        f.y+=f.s; if(f.y>height){f.y=-5;f.x=Math.random()*width;}
+                    }); ctx.fill(); requestAnimationFrame(draw);
                 }
-                window.addEventListener('resize', () => { width = window.innerWidth; height = window.innerHeight; canvas.width = width; canvas.height = height; });
-                draw();
+                window.addEventListener('resize',()=>{width=window.innerWidth;height=window.innerHeight;canvas.width=width;canvas.height=height;}); draw();
             })();
-            
-            // 기존 일정표 렌더링 (그대로 유지)
-            // ... (아까 만든 renderMyBoard 등의 함수는 script.js에 있거나 여기에 추가)
-            const MY_TITLE = "1차 지필평가"; 
-            const D_DAY_DATE = "2024-12-16"; 
-            const MY_SCHEDULES = [
-                { subject: '수학', content: '삼각함수 ~ 수열 (교과서 p.50~100)', color: 'c-red' },
-                { subject: '영어', content: '수능특강 3강, 4강 전체', color: 'c-blue' },
-                { subject: '국어', content: '문학 작품 분석 프린트물', color: 'c-green' },
-                { subject: '정보', content: '파이썬 수행평가 제출 마감', color: 'c-yellow' },
-            ];
 
-            function calculateDDay(targetDate) {
-                const target = new Date(targetDate);
-                const today = new Date();
-                target.setHours(0,0,0,0); today.setHours(0,0,0,0);
-                const diff = target - today;
-                const dayDiff = Math.ceil(diff / (1000 * 60 * 60 * 24));
-                if (dayDiff === 0) return "D-Day";
-                if (dayDiff > 0) return "D-" + dayDiff;
-                return "D+" + Math.abs(dayDiff);
-            }
-
-            function renderMyBoard() {
-                const aside = document.querySelector('aside');
-                if (!aside) return; 
-                const originalNotice = aside.querySelector('.notice');
-                if (originalNotice) originalNotice.style.display = 'none';
-
-                if (!document.getElementById('my-dashboard-container')) {
-                    const container = document.createElement('div');
-                    container.id = 'my-dashboard-container';
-                    const ul = document.createElement('ul');
-                    ul.id = 'my-custom-list';
-                    ul.className = 'notice-ul';
-                    const statsDiv = aside.querySelector('div'); 
-                    if (statsDiv) { aside.appendChild(container); aside.appendChild(ul); }
-                    else { aside.appendChild(container); aside.appendChild(ul); }
+            // 일정표 렌더링
+            const MY_TITLE="1차 지필평가"; const D_DAY_DATE="2024-12-16"; 
+            const MY_SCHEDULES=[{subject:'수학',content:'삼각함수 ~ 수열',color:'c-red'},{subject:'영어',content:'수능특강 3강, 4강',color:'c-blue'},{subject:'국어',content:'문학 작품 분석',color:'c-green'},{subject:'정보',content:'파이썬 수행평가',color:'c-yellow'}];
+            function calculateDDay(t){const d=new Date(t);const n=new Date();d.setHours(0,0,0,0);n.setHours(0,0,0,0);const x=Math.ceil((d-n)/864e5);return x===0?"D-Day":x>0?"D-"+x:"D+"+Math.abs(x);}
+            function renderMyBoard(){
+                const aside=document.querySelector('aside'); if(!aside)return;
+                const ori=aside.querySelector('.notice'); if(ori)ori.style.display='none';
+                if(!document.getElementById('my-dashboard-container')){
+                    const c=document.createElement('div'); c.id='my-dashboard-container';
+                    const u=document.createElement('ul'); u.id='my-custom-list'; u.className='notice-ul';
+                    const s=aside.querySelector('div'); if(s){aside.appendChild(c);aside.appendChild(u);}
                 }
-
-                const container = document.getElementById('my-dashboard-container');
-                const newHeaderHTML = `
-                    <span class="my-title" style="font-weight:700; font-size:1.8rem; color:#e8ecf3; display:block; margin-bottom:10px;">${MY_TITLE}</span>
-                    <span class="my-dday-badge" style="font-size:1.5rem; font-weight:800; color:#ff6b6b; background:rgba(255,107,107,0.15); padding:5px 15px; border-radius:50px;">${calculateDDay(D_DAY_DATE)}</span>
-                `;
-                if (container.innerHTML !== newHeaderHTML) container.innerHTML = newHeaderHTML;
-
-                const ul = document.getElementById('my-custom-list');
-                const newListHTML = MY_SCHEDULES.map(item => `
-                    <li class="${item.color}">
-                        <span class="type-tag">${item.subject}</span>
-                        <span>${item.content}</span>
-                    </li>
-                `).join('');
-                if (ul.innerHTML !== newListHTML) ul.innerHTML = newListHTML;
+                const c=document.getElementById('my-dashboard-container');
+                const h=`<span class="my-title">${MY_TITLE}</span><span class="my-dday-badge">${calculateDDay(D_DAY_DATE)}</span>`;
+                if(c.innerHTML!==h)c.innerHTML=h;
+                const u=document.getElementById('my-custom-list');
+                const l=MY_SCHEDULES.map(i=>`<li class="${i.color}"><span class="type-tag">${i.subject}</span><span>${i.content}</span></li>`).join('');
+                if(u.innerHTML!==l)u.innerHTML=l;
             }
-            setInterval(renderMyBoard, 100);
+            setInterval(renderMyBoard,100);
         }
     </script>
   </body>
