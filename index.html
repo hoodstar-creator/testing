@@ -11,22 +11,45 @@
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
     <style>
-      /* [1] PC 화면 스타일 */
+      /* ========================================= */
+      /* [A] 공통 및 PC 화면 스타일 최적화 */
+      /* ========================================= */
+      
+      /* 눈 내리는 캔버스 (클릭 방해 X) */
       #snow-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; pointer-events: none; }
+
+      /* 불필요한 원본 요소 숨김 (커스텀 일정표와 충돌 방지) */
       .form, .notice, .aside-announcement, ul.notice-ul:not(#my-custom-list) { display: none !important; }
 
-      /* PC 왼쪽 하단 연결 코드 */
+      /* PC 왼쪽 하단 연결 코드 표시 디자인 */
       #connection-display {
           position: fixed; bottom: 20px; left: 20px; 
           background: rgba(0,0,0,0.85); color: white; padding: 15px 20px; 
           border-radius: 12px; z-index: 10000; border: 1px solid #444;
           box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-family: monospace;
           backdrop-filter: blur(5px);
+          transition: opacity 0.5s ease;
       }
       #room-id-text { font-size: 2rem; font-weight: bold; color: #5ac4ff; letter-spacing: 3px; text-align: center; margin: 5px 0; }
       #pc-status-msg { font-size: 0.85rem; color: #00ff88; text-align: center; }
 
-      /* [2] 모바일 리모컨 스타일 */
+      /* 커스텀 일정표 디자인 (사이드바에 삽입됨) */
+      #my-dashboard-container { text-align: center; margin-top: 15px; margin-bottom: 20px; animation: fadeIn 0.8s ease; position: relative; z-index: 1; }
+      .my-title { font-weight: 700; font-size: 1.8rem; color: var(--text); display: block; margin-bottom: 10px; }
+      .my-dday-badge { font-size: 1.5rem; font-weight: 800; color: #ff6b6b; background: rgba(255, 107, 107, 0.15); padding: 5px 15px; border-radius: 50px; display: inline-block; margin-bottom: 15px; }
+      #my-custom-list { display: flex !important; flex-direction: column; gap: 10px; z-index: 1; position: relative; }
+
+      /* 사유 뱃지 (자석에 붙는 빨간 라벨) */
+      .reason-badge {
+          background: #ff4757; color: white; font-size: 0.7rem; padding: 2px 6px;
+          border-radius: 4px; margin-top: 4px; font-weight: bold; display: block;
+          white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+          animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      /* ========================================= */
+      /* [B] 모바일 리모컨 전용 스타일 (반응형) */
+      /* ========================================= */
       body.mobile-mode { background: #f1f5f9; color: #1e293b; font-family: -apple-system, sans-serif; height: 100vh; overflow: hidden; margin: 0; }
       body.mobile-mode #app, body.mobile-mode #snow-canvas, body.mobile-mode #connection-display { display: none !important; }
 
@@ -37,17 +60,18 @@
       .m-card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box; }
       .m-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 20px; color: #0f172a; text-align: center; letter-spacing: -0.5px; }
       
-      .m-input { width: 100%; padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; font-size: 1.1rem; text-align: center; box-sizing: border-box; transition: 0.2s; background: #f8fafc; color: #333; }
+      .m-input { width: 100%; padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; font-size: 1.2rem; text-align: center; box-sizing: border-box; transition: 0.2s; background: #f8fafc; color: #333; }
       .m-input:focus { border-color: #2563eb; background: #fff; outline: none; }
       
       .m-btn { width: 100%; padding: 16px; background: #2563eb; color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3); }
       .m-btn:active { transform: scale(0.97); }
 
-      /* 컨트롤러 화면 */
+      /* 상태 표시 박스 */
       .status-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 20px; }
       .status-label { font-size: 0.85rem; color: #64748b; margin-bottom: 4px; }
       .status-value { font-size: 1.3rem; font-weight: 800; color: #1e40af; }
 
+      /* 버튼 그리드 */
       .loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
       .loc-btn { 
           padding: 18px 10px; border: 1px solid #e2e8f0; background: white; 
@@ -56,14 +80,6 @@
           box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: 0.1s;
       }
       .loc-btn:active { background: #f8fafc; transform: scale(0.96); border-color: #cbd5e1; }
-      
-      /* 사유 뱃지 (PC 자석에 붙음) */
-      .reason-badge {
-          background: #ff4757; color: white; font-size: 0.7rem; padding: 2px 6px;
-          border-radius: 4px; margin-top: 4px; font-weight: bold; display: block;
-          white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
-          animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      }
 
       @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
@@ -71,6 +87,7 @@
   </head>
   <body>
     <canvas id="snow-canvas"></canvas>
+    
     <div id="app"></div>
 
     <div id="connection-display" style="display: none;">
@@ -82,8 +99,8 @@
     <div id="screen-connect" class="mobile-container hidden">
         <div class="m-card fade-in">
             <h1 class="m-title">리모컨 연결</h1>
-            <p class="m-desc">PC 화면의 4자리 코드를 입력하세요</p>
-            <input type="number" id="input-room-code" class="m-input" placeholder="코드 (예: 1234)" inputmode="numeric">
+            <p style="text-align:center; color:#666; margin-bottom:20px;">PC 화면 좌측 하단의 코드를 입력하세요</p>
+            <input type="number" id="input-room-code" class="m-input" placeholder="코드 4자리" inputmode="numeric">
             <button id="btn-connect-pc" class="m-btn">연결하기</button>
         </div>
     </div>
@@ -91,11 +108,8 @@
     <div id="screen-login" class="mobile-container hidden">
         <div class="m-card fade-in">
             <h1 class="m-title">학생 로그인</h1>
-            <p class="m-desc">본인의 학번과 비밀번호를 입력하세요</p>
-            
             <input type="tel" id="input-student-id" class="m-input" placeholder="학번 (예: 1201)" maxlength="4">
             <input type="password" id="input-student-pw" class="m-input" placeholder="비밀번호" maxlength="10">
-            
             <button id="btn-login" class="m-btn">로그인</button>
         </div>
         <p style="text-align:center; color:#94a3b8; font-size:0.8rem; margin-top:20px;">초기 비밀번호: 1234</p>
@@ -120,7 +134,7 @@
                 <button class="loc-btn" onclick="sendMove('room')">🏫 교실</button>
                 <button class="loc-btn" onclick="sendMove('afterschool')">📚 방과후</button>
                 <button class="loc-btn" onclick="sendMove('club')">⚽ 동아리</button>
-                <button class="loc-btn" onclick="sendMove('early')">🏃 조기/결석</button>
+                <button class="loc-btn" onclick="sendMove('early')">🏃 조기입실/결석</button>
                 <button class="loc-btn" onclick="sendMove('restroom')">🚽 화장실/정수기</button>
                 <button class="loc-btn" onclick="sendMove('etc')">🎸 기타</button>
             </div>
@@ -129,8 +143,7 @@
 
     <script>
         // ==========================================
-        // [설정] 학생 명단 (학번 : {이름, 비번})
-        // 초기 비밀번호는 모두 '1234'로 설정됨
+        // [설정 1] 학생 명단 (학번 : {이름, 비번})
         // ==========================================
         const STUDENT_DB = {
             '1201': { name: '구민찬', pw: '1234' }, '1202': { name: '권재현', pw: '1234' },
@@ -151,9 +164,10 @@
             '1232': { name: '김범준', pw: '1234' }
         };
 
-        // P2P 통신 설정
+        // P2P 통신 설정 (구글 STUN 서버 사용으로 연결 안정성 확보)
         const peerConfig = { config: { 'iceServers': [ { urls: 'stun:stun.l.google.com:19302' } ] } };
 
+        // 모바일/PC 모드 감지
         const urlParams = new URLSearchParams(window.location.search);
         const isMobile = urlParams.get('mode') === 'mobile';
         let peer = null;
@@ -162,7 +176,7 @@
         let myId = "";
 
         // ----------------------------------------------------------------
-        // [A] 모바일 리모컨 로직
+        // [A] 모바일 리모컨 로직 (폰에서 실행됨)
         // ----------------------------------------------------------------
         if (isMobile) {
             document.body.classList.add('mobile-mode');
@@ -184,7 +198,7 @@
                 });
             };
 
-            // 2. 로그인 (학번 + 비밀번호 체크)
+            // 2. 로그인 (학번 + 비밀번호)
             document.getElementById('btn-login').onclick = () => {
                 const inputId = document.getElementById('input-student-id').value.trim();
                 const inputPw = document.getElementById('input-student-pw').value.trim();
@@ -193,7 +207,6 @@
 
                 if (student) {
                     if (student.pw === inputPw) {
-                        // 로그인 성공
                         myName = student.name;
                         myId = inputId;
                         document.getElementById('user-name-display').innerText = myName;
@@ -214,12 +227,12 @@
                 let reason = "";
                 let displayLoc = "";
 
-                // 버튼별 텍스트 및 사유 자동 설정
+                // 버튼별 텍스트 설정
                 if(locationType === 'room') displayLoc = "교실";
-                else if(locationType === 'afterschool') { displayLoc = "방과후"; }
-                else if(locationType === 'club') { displayLoc = "동아리"; }
-                else if(locationType === 'early') { displayLoc = "조기입실/결석"; }
-                else if(locationType === 'restroom') { displayLoc = "화장실/정수기"; }
+                else if(locationType === 'afterschool') displayLoc = "방과후";
+                else if(locationType === 'club') displayLoc = "동아리";
+                else if(locationType === 'early') displayLoc = "조기입실/결석";
+                else if(locationType === 'restroom') displayLoc = "화장실/정수기";
                 else if(locationType === 'etc') {
                     reason = prompt("기타 사유 입력");
                     if (!reason) return;
@@ -245,7 +258,7 @@
         } 
         
         // ----------------------------------------------------------------
-        // [B] PC 현황판 로직
+        // [B] PC 현황판 로직 (원본 사이트 위에서 실행됨)
         // ----------------------------------------------------------------
         else {
             const roomCode = Math.floor(1000 + Math.random() * 9000);
@@ -260,23 +273,21 @@
                 document.getElementById('pc-status-msg').innerText = "🟢 폰과 연결됨!";
                 connection.on('data', (data) => {
                     if (data.type === 'move') {
+                        // ★ 자석 이동 및 장소 매핑 로직 ★
                         let targetLane = 'etc'; // 기본값 (안전빵)
                         let reasonText = "";
 
-                        // [장소 매핑 및 자석 찾기 로직]
-                        if (data.target === 'room') {
-                            targetLane = 'room'; 
-                        } else if (data.target === 'restroom') {
-                            targetLane = 'toilet'; // 화장실은 보통 toilet 레인 사용
-                        } else {
-                            // 방과후, 동아리, 조기입실 등
-                            // PC 화면에 해당 data-lane이 있는지 확인
+                        // 1. 교실과 화장실은 실제 레인 이름 사용
+                        if (data.target === 'room') targetLane = 'room'; 
+                        else if (data.target === 'restroom') targetLane = 'toilet'; // 보통 화장실 레인 이름은 'toilet'
+                        else {
+                            // 2. 방과후, 동아리, 조기입실 등은 실제 레인이 있는지 확인
                             const laneExists = document.querySelector(`div[data-lane="${data.target}"]`);
                             
                             if (laneExists) {
-                                targetLane = data.target; // 있으면 거기로 보냄
+                                targetLane = data.target; // 있으면 거기로
                             } else {
-                                // ★ 없으면 'etc'로 보내고 사유를 붙임 (안전 장치) ★
+                                // 3. 없으면 '기타(etc)'로 보내고 사유를 붙임 (시각적 구분)
                                 targetLane = 'etc';
                                 if (data.target === 'afterschool') reasonText = "방과후";
                                 else if (data.target === 'club') reasonText = "동아리";
@@ -285,7 +296,7 @@
                             }
                         }
 
-                        // 자석 이동 실행
+                        // 실제 이동 함수 실행
                         moveMagnetSmart(data.name, data.id, targetLane, reasonText);
                     }
                 });
@@ -294,44 +305,37 @@
 
             // [똑똑한 자석 이동 함수]
             function moveMagnetSmart(studentName, studentId, targetLane, reason) {
-                // 1. 번호 계산 (1201 -> 1)
+                // 1. 번호 계산 (1201 -> 1번 자석)
                 const seatNumber = studentId ? (parseInt(studentId) - 1200) : null;
 
-                // [중요] 원본 script.js의 Be 함수 호출 시도
-                // (DOM에 직접 접근하기보다 원본 로직을 태우는 게 가장 안전함)
-                
-                // Be 함수가 전역에 노출되어 있는지 확인 (보통 안 되어있음)
-                // 따라서 DOM 조작 방식으로 진행하되, Be 함수 로직을 흉내냄
-                
                 // 2. 자석 찾기
                 const chips = document.querySelectorAll('.chip');
                 let targetChip = null;
 
-                // (1) 이름으로 찾기
+                // (1) 이름으로 먼저 찾기 ("구민찬")
                 chips.forEach(chip => {
                     if (chip.innerText.includes(studentName)) targetChip = chip;
                 });
 
-                // (2) 못 찾으면 번호로 찾기
+                // (2) 이름으로 못 찾으면 번호로 찾기 ("1")
                 if (!targetChip && seatNumber) {
                     chips.forEach(chip => {
+                        // 텍스트가 정확히 숫자만 있거나 공백 포함일 수 있으므로 trim()
                         if (chip.innerText.trim() === String(seatNumber)) targetChip = chip;
                     });
                 }
 
                 if (targetChip) {
-                    // 원래 로직(Be 함수) 대신 직접 DOM 이동 (가장 확실함)
-                    
-                    // 목적지 컨테이너 찾기
+                    // 3. 목적지 컨테이너 찾기
                     let destContainer = document.querySelector(`div[data-lane="${targetLane}"]`);
                     // .lane 내부의 실제 컨테이너(보통 마지막 div) 잡기
-                    // 구조: <div class="lane" data-lane="room"> <div title>...</div> <div content>...</div> </div>
                     const realDest = destContainer ? (destContainer.querySelector('div:last-child') || destContainer) : null;
 
                     if (realDest) {
+                        // 4. 자석 이동 (DOM 조작)
                         realDest.appendChild(targetChip);
                         
-                        // 사유 뱃지 달기/떼기
+                        // 5. 사유 뱃지 달기/떼기
                         let badge = targetChip.querySelector('.reason-badge');
                         if (reason) {
                             if (!badge) {
@@ -349,7 +353,7 @@
                 }
             }
 
-            // [기타] 눈 효과 및 일정표 (기존 유지)
+            // [기타] 눈 효과 및 커스텀 일정표 (기존 유지)
             (function() {
                 const canvas = document.getElementById('snow-canvas');
                 const ctx = canvas.getContext('2d');
