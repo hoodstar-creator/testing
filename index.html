@@ -181,6 +181,99 @@
     
     <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"c6be42378ecd4c3f942d4edf079a385d","r":1,"server_timing":{"name":{"cfCacheStatus":true}}}'></script>
   </body>
+  <canvas id="snow-canvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; pointer-events: none;"></canvas>
+
+    <script>
+        (function() {
+            const canvas = document.getElementById('snow-canvas');
+            const ctx = canvas.getContext('2d');
+
+            let width = window.innerWidth;
+            let height = window.innerHeight;
+            canvas.width = width;
+            canvas.height = height;
+
+            // 눈송이 설정
+            const maxFlakes = 120; // 눈송이 개수 (너무 많으면 시야 방해됨)
+            const flakes = [];
+            
+            // 바닥에 쌓이는 효과 변수
+            let accumulationHeight = 0; 
+            const maxAccumulation = 40; // 최대 쌓이는 높이
+
+            // 눈송이 생성자
+            function Flake() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * -height;
+                this.radius = Math.random() * 2 + 1; // 크기 1~3px
+                this.speed = Math.random() * 1 + 0.5; // 속도
+                this.wind = Math.random() * 0.5 - 0.25; // 바람
+                this.opacity = Math.random() * 0.5 + 0.3; // 반투명
+            }
+
+            // 초기 생성
+            for (let i = 0; i < maxFlakes; i++) {
+                flakes.push(new Flake());
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, width, height);
+
+                // 1. 바닥에 쌓이는 효과 (부드러운 흰색 그라데이션)
+                if (accumulationHeight > 0) {
+                    const gradient = ctx.createLinearGradient(0, height, 0, height - accumulationHeight);
+                    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)'); // 바닥 쪽은 하얗게
+                    gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');   // 위로 갈수록 투명하게
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, height - accumulationHeight, width, accumulationHeight);
+                }
+
+                // 2. 눈송이 그리기
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.beginPath();
+                
+                for (let i = 0; i < flakes.length; i++) {
+                    const f = flakes[i];
+                    
+                    ctx.globalAlpha = f.opacity;
+                    ctx.moveTo(f.x, f.y);
+                    ctx.arc(f.x, f.y, f.radius, 0, Math.PI * 2);
+
+                    // 위치 업데이트
+                    f.y += f.speed;
+                    f.x += f.wind;
+
+                    // 화면 밖으로 나가거나 바닥에 닿으면
+                    if (f.y > height) {
+                        // 바닥에 쌓이는 높이 증가 (천천히)
+                        if (accumulationHeight < maxAccumulation && Math.random() > 0.98) {
+                            accumulationHeight += 0.05;
+                        }
+                        // 눈송이 재활용 (위로 보냄)
+                        f.y = -5;
+                        f.x = Math.random() * width;
+                    }
+                    
+                    if (f.x > width) f.x = 0;
+                    if (f.x < 0) f.x = width;
+                }
+                ctx.fill();
+                ctx.globalAlpha = 1;
+
+                requestAnimationFrame(draw);
+            }
+
+            // 화면 크기 변경 시 대응
+            window.addEventListener('resize', function() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+            });
+
+            draw();
+        })();
+    </script>
 <div id="custom-modal-overlay" class="modal-overlay" style="display: none;">
         
         <div class="window-reason">
