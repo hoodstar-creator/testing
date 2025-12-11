@@ -1,394 +1,303 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>학습 장소 현황판</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>1학년 2반 현황판</title>
     
-    <link rel="stylesheet" crossorigin href="./style.css">
-    <script type="module" crossorigin src="./script.js"></script>
-    
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
-      /* ========================================= */
-      /* [A] 공통 및 PC 화면 스타일 최적화 */
-      /* ========================================= */
-      
-      /* 눈 내리는 캔버스 (클릭 방해 X) */
-      #snow-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; pointer-events: none; }
-
-      /* 불필요한 원본 요소 숨김 (커스텀 일정표와 충돌 방지) */
-      .form, .notice, .aside-announcement, ul.notice-ul:not(#my-custom-list) { display: none !important; }
-
-      /* PC 왼쪽 하단 연결 코드 표시 디자인 */
-      #connection-display {
-          position: fixed; bottom: 20px; left: 20px; 
-          background: rgba(0,0,0,0.85); color: white; padding: 15px 20px; 
-          border-radius: 12px; z-index: 10000; border: 1px solid #444;
-          box-shadow: 0 4px 15px rgba(0,0,0,0.5); font-family: monospace;
-          backdrop-filter: blur(5px);
-          transition: opacity 0.5s ease;
-      }
-      #room-id-text { font-size: 2rem; font-weight: bold; color: #5ac4ff; letter-spacing: 3px; text-align: center; margin: 5px 0; }
-      #pc-status-msg { font-size: 0.85rem; color: #00ff88; text-align: center; }
-
-      /* 커스텀 일정표 디자인 (사이드바에 삽입됨) */
-      #my-dashboard-container { text-align: center; margin-top: 15px; margin-bottom: 20px; animation: fadeIn 0.8s ease; position: relative; z-index: 1; }
-      .my-title { font-weight: 700; font-size: 1.8rem; color: var(--text); display: block; margin-bottom: 10px; }
-      .my-dday-badge { font-size: 1.5rem; font-weight: 800; color: #ff6b6b; background: rgba(255, 107, 107, 0.15); padding: 5px 15px; border-radius: 50px; display: inline-block; margin-bottom: 15px; }
-      #my-custom-list { display: flex !important; flex-direction: column; gap: 10px; z-index: 1; position: relative; }
-
-      /* 사유 뱃지 (자석에 붙는 빨간 라벨) */
-      .reason-badge {
-          background: #ff4757; color: white; font-size: 0.7rem; padding: 2px 6px;
-          border-radius: 4px; margin-top: 4px; font-weight: bold; display: block;
-          white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
-          animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      }
-
-      /* ========================================= */
-      /* [B] 모바일 리모컨 전용 스타일 (반응형) */
-      /* ========================================= */
-      body.mobile-mode { background: #f1f5f9; color: #1e293b; font-family: -apple-system, sans-serif; height: 100vh; overflow: hidden; margin: 0; }
-      body.mobile-mode #app, body.mobile-mode #snow-canvas, body.mobile-mode #connection-display { display: none !important; }
-
-      .mobile-container { max-width: 450px; margin: 0 auto; height: 100%; padding: 20px; display: flex; flex-direction: column; justify-content: center; box-sizing: border-box; }
-      .hidden { display: none !important; }
-      .fade-in { animation: fadeIn 0.4s ease; }
-
-      .m-card { background: white; border-radius: 16px; padding: 24px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); width: 100%; box-sizing: border-box; }
-      .m-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 20px; color: #0f172a; text-align: center; letter-spacing: -0.5px; }
-      
-      .m-input { width: 100%; padding: 16px; border: 2px solid #e2e8f0; border-radius: 12px; margin-bottom: 12px; font-size: 1.2rem; text-align: center; box-sizing: border-box; transition: 0.2s; background: #f8fafc; color: #333; }
-      .m-input:focus { border-color: #2563eb; background: #fff; outline: none; }
-      
-      .m-btn { width: 100%; padding: 16px; background: #2563eb; color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3); }
-      .m-btn:active { transform: scale(0.97); }
-
-      /* 상태 표시 박스 */
-      .status-box { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 15px; text-align: center; margin-bottom: 20px; }
-      .status-label { font-size: 0.85rem; color: #64748b; margin-bottom: 4px; }
-      .status-value { font-size: 1.3rem; font-weight: 800; color: #1e40af; }
-
-      /* 버튼 그리드 */
-      .loc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-      .loc-btn { 
-          padding: 18px 10px; border: 1px solid #e2e8f0; background: white; 
-          border-radius: 12px; font-weight: 600; cursor: pointer; color: #333;
-          font-size: 1rem; display: flex; flex-direction: column; align-items: center; gap: 6px;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: 0.1s;
-      }
-      .loc-btn:active { background: #f8fafc; transform: scale(0.96); border-color: #cbd5e1; }
-
-      @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-      @keyframes popIn { from { transform: scale(0); } to { transform: scale(1); } }
+        @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css");
+        body { font-family: "Pretendard Variable", sans-serif; background-color: #111827; color: white; overflow: hidden; }
+        
+        /* 눈 내리는 효과 */
+        #snow-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 50; }
+        
+        /* 스크롤바 숨김 */
+        ::-webkit-scrollbar { display: none; }
+        
+        /* 칠판 모드 그리드 */
+        .board-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 12px; padding: 20px; height: 100vh; align-content: center; }
+        
+        /* 카드 디자인 */
+        .seat-card {
+            background: #1f2937; border: 1px solid #374151; border-radius: 12px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            height: 140px; transition: all 0.3s ease; position: relative;
+        }
+        .seat-card.empty { opacity: 0.5; }
+        
+        /* 상태별 색상 */
+        .status-room { border-color: #374151; }
+        .status-etc { border-color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
+        .status-away { border-color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+        
+        /* 모바일 버튼 */
+        .mobile-btn { padding: 20px; border-radius: 16px; font-weight: bold; font-size: 1.1rem; transition: 0.2s; border: none; }
+        .mobile-btn:active { transform: scale(0.95); }
     </style>
-  </head>
-  <body>
-    <canvas id="snow-canvas"></canvas>
-    
-    <div id="app"></div>
+</head>
+<body>
+    <div id="app">
+        <canvas id="snow-canvas"></canvas>
 
-    <div id="connection-display" style="display: none;">
-        <h3>🔗 리모컨 코드</h3>
-        <div id="room-id-text">...</div>
-        <div id="pc-status-msg">연결 대기 중...</div>
-    </div>
-
-    <div id="screen-connect" class="mobile-container hidden">
-        <div class="m-card fade-in">
-            <h1 class="m-title">리모컨 연결</h1>
-            <p style="text-align:center; color:#666; margin-bottom:20px;">PC 화면 좌측 하단의 코드를 입력하세요</p>
-            <input type="number" id="input-room-code" class="m-input" placeholder="코드 4자리" inputmode="numeric">
-            <button id="btn-connect-pc" class="m-btn">연결하기</button>
-        </div>
-    </div>
-
-    <div id="screen-login" class="mobile-container hidden">
-        <div class="m-card fade-in">
-            <h1 class="m-title">학생 로그인</h1>
-            <input type="tel" id="input-student-id" class="m-input" placeholder="학번 (예: 1201)" maxlength="4">
-            <input type="password" id="input-student-pw" class="m-input" placeholder="비밀번호" maxlength="10">
-            <button id="btn-login" class="m-btn">로그인</button>
-        </div>
-        <p style="text-align:center; color:#94a3b8; font-size:0.8rem; margin-top:20px;">초기 비밀번호: 1234</p>
-    </div>
-
-    <div id="screen-dashboard" class="mobile-container hidden">
-        <div class="m-card fade-in">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding-bottom:15px; border-bottom:1px solid #f1f5f9;">
-                <div>
-                    <span style="font-weight:800; font-size:1.3rem; color:#0f172a;" id="user-name-display">이름</span>
-                    <span style="color:#64748b; font-size:0.9rem; margin-left:5px;" id="user-id-display"></span>
+        <div v-if="isBoardMode" class="board-container">
+            <div class="fixed top-0 left-0 w-full p-4 text-center z-10 bg-gray-900/80 backdrop-blur">
+                <h1 class="text-3xl font-bold text-gray-100">1학년 2반 학습 장소 현황</h1>
+                <div class="flex justify-center gap-6 mt-2 text-lg">
+                    <span class="text-gray-400">총원: {{ totalStudents }}명</span>
+                    <span class="text-blue-400">현원: {{ presentCount }}명</span>
+                    <span class="text-red-400">이동: {{ awayCount }}명</span>
                 </div>
-                <button id="btn-logout" style="background:none; border:none; color:#94a3b8; text-decoration:underline; cursor:pointer; font-size:0.9rem;">나가기</button>
             </div>
 
-            <div class="status-box">
-                <div class="status-label">현재 상태</div>
-                <div id="current-status-text" class="status-value">교실</div>
+            <div class="board-grid">
+                <div v-for="n in 32" :key="n" v-show="n !== 31" class="seat-card" :class="getSeatClass(n)">
+                    <div class="absolute top-2 left-3 text-sm text-gray-500 font-mono">{{ n }}</div>
+                    
+                    <div class="text-2xl font-bold mb-1">{{ getStudentName(n) || '-' }}</div>
+                    
+                    <div v-if="getStudentStatus(n) !== '교실'" class="px-3 py-1 rounded-full text-sm font-bold animate-pulse" 
+                         :class="getStatusColor(n)">
+                        {{ getStudentStatus(n) }}
+                    </div>
+                    <div v-else class="text-sm text-gray-600">교실</div>
+                </div>
+            </div>
+        </div>
+
+        <div v-else class="flex flex-col items-center justify-center min-h-screen p-6 relative z-10">
+            
+            <div v-if="!user" class="w-full max-w-md text-center">
+                <h1 class="text-4xl font-bold mb-2">디미고 인원점검</h1>
+                <p class="text-gray-400 mb-10">1학년 2반 전용</p>
+                
+                <button @click="googleLogin" class="w-full bg-white text-gray-900 font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-3 hover:bg-gray-100 transition">
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-6 h-6">
+                    디미고 계정으로 로그인
+                </button>
+                <p class="text-sm text-gray-600 mt-4">* @dimigo.hs.kr 계정만 가능합니다.</p>
             </div>
 
-            <div class="loc-grid">
-                <button class="loc-btn" onclick="sendMove('room')">🏫 교실</button>
-                <button class="loc-btn" onclick="sendMove('afterschool')">📚 방과후</button>
-                <button class="loc-btn" onclick="sendMove('club')">⚽ 동아리</button>
-                <button class="loc-btn" onclick="sendMove('early')">🏃 조기입실/결석</button>
-                <button class="loc-btn" onclick="sendMove('restroom')">🚽 화장실/정수기</button>
-                <button class="loc-btn" onclick="sendMove('etc')">🎸 기타</button>
+            <div v-else class="w-full max-w-md">
+                <div class="flex justify-between items-center mb-8">
+                    <div>
+                        <h2 class="text-2xl font-bold">{{ myName }}</h2>
+                        <p class="text-blue-400 font-mono">{{ mySeatNo }}번</p>
+                    </div>
+                    <button @click="logout" class="text-sm text-gray-500 underline">로그아웃</button>
+                </div>
+
+                <div class="bg-gray-800 p-6 rounded-2xl text-center mb-6 border border-gray-700">
+                    <p class="text-gray-400 text-sm mb-2">현재 상태</p>
+                    <p class="text-3xl font-bold text-white">{{ myStatus || '교실' }}</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <button @click="updateStatus('교실')" class="mobile-btn bg-gray-700 text-white hover:bg-gray-600">
+                        🏫 교실 복귀
+                    </button>
+                    <button @click="updateStatus('화장실')" class="mobile-btn bg-blue-900/50 text-blue-200 border border-blue-800 hover:bg-blue-900">
+                        🚽 화장실
+                    </button>
+                    <button @click="updateStatus('식수')" class="mobile-btn bg-blue-900/50 text-blue-200 border border-blue-800 hover:bg-blue-900">
+                        💧 식수
+                    </button>
+                    <button @click="updateStatus('보건실')" class="mobile-btn bg-red-900/50 text-red-200 border border-red-800 hover:bg-red-900">
+                        💊 보건실
+                    </button>
+                    <button @click="updateStatus('동아리')" class="mobile-btn bg-purple-900/50 text-purple-200 border border-purple-800 hover:bg-purple-900">
+                        ⚽ 동아리
+                    </button>
+                    <button @click="updateStatus('방과후')" class="mobile-btn bg-purple-900/50 text-purple-200 border border-purple-800 hover:bg-purple-900">
+                        📚 방과후
+                    </button>
+                    <button @click="askEtc" class="mobile-btn col-span-2 bg-yellow-900/50 text-yellow-200 border border-yellow-800 hover:bg-yellow-900">
+                        🎸 기타 사유 입력
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 
-    <script>
-        // ==========================================
-        // [설정 1] 학생 명단 (학번 : {이름, 비번})
-        // ==========================================
-        const STUDENT_DB = {
-            '1201': { name: '구민찬', pw: '1234' }, '1202': { name: '권재현', pw: '1234' },
-            '1203': { name: '김민채', pw: '1234' }, '1204': { name: '김보경', pw: '1234' },
-            '1205': { name: '김채경', pw: '1234' }, '1206': { name: '나기찬', pw: '1234' },
-            '1207': { name: '박근우', pw: '1234' }, '1208': { name: '박서윤', pw: '1234' },
-            '1209': { name: '박서현', pw: '1234' }, '1210': { name: '박소율', pw: '1234' },
-            '1211': { name: '박시하', pw: '1234' }, '1212': { name: '박재윤', pw: '1234' },
-            '1213': { name: '박초연', pw: '1234' }, '1214': { name: '양세린', pw: '1234' },
-            '1215': { name: '엄로이', pw: '1234' }, '1216': { name: '유승후', pw: '1234' },
-            '1217': { name: '이규원', pw: '1234' }, '1218': { name: '이나경', pw: '1234' },
-            '1219': { name: '이예준', pw: '1234' }, '1220': { name: '이지원', pw: '1234' },
-            '1221': { name: '정이현', pw: '1234' }, '1222': { name: '정태겸', pw: '1234' },
-            '1223': { name: '조민서', pw: '1234' }, '1224': { name: '조율희', pw: '1234' },
-            '1225': { name: '지아림', pw: '1234' }, '1226': { name: '최예진', pw: '1234' },
-            '1227': { name: '최유혁', pw: '1234' }, '1228': { name: '하시은', pw: '1234' },
-            '1229': { name: '한진환', pw: '1234' }, '1230': { name: '허유정', pw: '1234' },
-            '1232': { name: '김범준', pw: '1234' }
+    <script type="module">
+        import { createApp, ref, computed, onMounted } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getDatabase, ref as dbRef, onValue, set } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js";
+
+        // ============================================================
+        // [설정] Firebase 키 (본인 키로 교체 필수!)
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyD...", 
+            authDomain: "xxxx.firebaseapp.com",
+            databaseURL: "https://xxxx-default-rtdb.firebaseio.com",
+            projectId: "xxxx",
+            storageBucket: "xxxx.appspot.com",
+            messagingSenderId: "123456",
+            appId: "1:123456:web:xxxx"
         };
 
-        // P2P 통신 설정 (구글 STUN 서버 사용으로 연결 안정성 확보)
-        const peerConfig = { config: { 'iceServers': [ { urls: 'stun:stun.l.google.com:19302' } ] } };
-
-        // 모바일/PC 모드 감지
-        const urlParams = new URLSearchParams(window.location.search);
-        const isMobile = urlParams.get('mode') === 'mobile';
-        let peer = null;
-        let conn = null;
-        let myName = "";
-        let myId = "";
-
-        // ----------------------------------------------------------------
-        // [A] 모바일 리모컨 로직 (폰에서 실행됨)
-        // ----------------------------------------------------------------
-        if (isMobile) {
-            document.body.classList.add('mobile-mode');
-            showScreen('screen-connect');
-
-            // 1. PC 연결
-            document.getElementById('btn-connect-pc').onclick = () => {
-                const code = document.getElementById('input-room-code').value.trim();
-                if (code.length < 3) return alert("코드를 확인해주세요.");
-
-                document.getElementById('btn-connect-pc').innerText = "연결 중...";
-                peer = new Peer(peerConfig);
-                
-                peer.on('open', () => {
-                    conn = peer.connect(`dimiboard-${code}`);
-                    conn.on('open', () => { showScreen('screen-login'); });
-                    conn.on('error', () => { alert("연결 실패! 코드를 다시 확인하세요."); document.getElementById('btn-connect-pc').innerText = "연결하기"; });
-                    conn.on('close', () => { alert("연결이 끊어졌습니다."); location.reload(); });
-                });
-            };
-
-            // 2. 로그인 (학번 + 비밀번호)
-            document.getElementById('btn-login').onclick = () => {
-                const inputId = document.getElementById('input-student-id').value.trim();
-                const inputPw = document.getElementById('input-student-pw').value.trim();
-                
-                const student = STUDENT_DB[inputId];
-
-                if (student) {
-                    if (student.pw === inputPw) {
-                        myName = student.name;
-                        myId = inputId;
-                        document.getElementById('user-name-display').innerText = myName;
-                        document.getElementById('user-id-display').innerText = myId;
-                        showScreen('screen-dashboard');
-                    } else {
-                        alert("비밀번호가 일치하지 않습니다.");
-                    }
-                } else {
-                    alert("명단에 없는 학번입니다.");
-                }
-            };
-
-            // 3. 이동 명령 전송
-            window.sendMove = function(locationType) {
-                if (!conn || !conn.open) return alert("PC와 연결이 끊어졌습니다.");
-                
-                let reason = "";
-                let displayLoc = "";
-
-                // 버튼별 텍스트 설정
-                if(locationType === 'room') displayLoc = "교실";
-                else if(locationType === 'afterschool') displayLoc = "방과후";
-                else if(locationType === 'club') displayLoc = "동아리";
-                else if(locationType === 'early') displayLoc = "조기입실/결석";
-                else if(locationType === 'restroom') displayLoc = "화장실/정수기";
-                else if(locationType === 'etc') {
-                    reason = prompt("기타 사유 입력");
-                    if (!reason) return;
-                    displayLoc = `기타 (${reason})`;
-                }
-
-                document.getElementById('current-status-text').innerText = displayLoc;
-                
-                // 데이터 전송
-                conn.send({ type: 'move', name: myName, id: myId, target: locationType, reason: reason });
-            };
-
-            document.getElementById('btn-logout').onclick = () => {
-                showScreen('screen-login');
-                document.getElementById('input-student-id').value = '';
-                document.getElementById('input-student-pw').value = '';
-            };
-
-            function showScreen(id) {
-                document.querySelectorAll('.mobile-container').forEach(el => el.classList.add('hidden'));
-                document.getElementById(id).classList.remove('hidden');
-            }
-        } 
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        const provider = new GoogleAuthProvider();
         
-        // ----------------------------------------------------------------
-        // [B] PC 현황판 로직 (원본 사이트 위에서 실행됨)
-        // ----------------------------------------------------------------
-        else {
-            const roomCode = Math.floor(1000 + Math.random() * 9000);
-            peer = new Peer(`dimiboard-${roomCode}`, peerConfig);
+        // 디미고 계정만 허용
+        provider.setCustomParameters({ hd: 'dimigo.hs.kr' });
 
-            peer.on('open', (id) => {
-                document.getElementById('connection-display').style.display = 'block';
-                document.getElementById('room-id-text').innerText = roomCode;
-            });
-
-            peer.on('connection', (connection) => {
-                document.getElementById('pc-status-msg').innerText = "🟢 폰과 연결됨!";
-                connection.on('data', (data) => {
-                    if (data.type === 'move') {
-                        // ★ 자석 이동 및 장소 매핑 로직 ★
-                        let targetLane = 'etc'; // 기본값 (안전빵)
-                        let reasonText = "";
-
-                        // 1. 교실과 화장실은 실제 레인 이름 사용
-                        if (data.target === 'room') targetLane = 'room'; 
-                        else if (data.target === 'restroom') targetLane = 'toilet'; // 보통 화장실 레인 이름은 'toilet'
-                        else {
-                            // 2. 방과후, 동아리, 조기입실 등은 실제 레인이 있는지 확인
-                            const laneExists = document.querySelector(`div[data-lane="${data.target}"]`);
-                            
-                            if (laneExists) {
-                                targetLane = data.target; // 있으면 거기로
-                            } else {
-                                // 3. 없으면 '기타(etc)'로 보내고 사유를 붙임 (시각적 구분)
-                                targetLane = 'etc';
-                                if (data.target === 'afterschool') reasonText = "방과후";
-                                else if (data.target === 'club') reasonText = "동아리";
-                                else if (data.target === 'early') reasonText = "조기/결석";
-                                else if (data.target === 'etc') reasonText = data.reason;
-                            }
-                        }
-
-                        // 실제 이동 함수 실행
-                        moveMagnetSmart(data.name, data.id, targetLane, reasonText);
-                    }
-                });
-                connection.on('close', () => { document.getElementById('pc-status-msg').innerText = "🔴 연결 끊김"; });
-            });
-
-            // [똑똑한 자석 이동 함수]
-            function moveMagnetSmart(studentName, studentId, targetLane, reason) {
-                // 1. 번호 계산 (1201 -> 1번 자석)
-                const seatNumber = studentId ? (parseInt(studentId) - 1200) : null;
-
-                // 2. 자석 찾기
-                const chips = document.querySelectorAll('.chip');
-                let targetChip = null;
-
-                // (1) 이름으로 먼저 찾기 ("구민찬")
-                chips.forEach(chip => {
-                    if (chip.innerText.includes(studentName)) targetChip = chip;
-                });
-
-                // (2) 이름으로 못 찾으면 번호로 찾기 ("1")
-                if (!targetChip && seatNumber) {
-                    chips.forEach(chip => {
-                        // 텍스트가 정확히 숫자만 있거나 공백 포함일 수 있으므로 trim()
-                        if (chip.innerText.trim() === String(seatNumber)) targetChip = chip;
+        createApp({
+            setup() {
+                const isBoardMode = ref(new URLSearchParams(window.location.search).get('mode') === 'board');
+                const user = ref(null);
+                const students = ref({}); // DB 전체 데이터
+                
+                // 내 정보
+                const myName = ref('');
+                const mySeatNo = ref(0);
+                
+                // 데이터 로드
+                onMounted(() => {
+                    // DB 실시간 감지
+                    onValue(dbRef(db, 'students'), (snapshot) => {
+                        students.value = snapshot.val() || {};
                     });
-                }
 
-                if (targetChip) {
-                    // 3. 목적지 컨테이너 찾기
-                    let destContainer = document.querySelector(`div[data-lane="${targetLane}"]`);
-                    // .lane 내부의 실제 컨테이너(보통 마지막 div) 잡기
-                    const realDest = destContainer ? (destContainer.querySelector('div:last-child') || destContainer) : null;
-
-                    if (realDest) {
-                        // 4. 자석 이동 (DOM 조작)
-                        realDest.appendChild(targetChip);
-                        
-                        // 5. 사유 뱃지 달기/떼기
-                        let badge = targetChip.querySelector('.reason-badge');
-                        if (reason) {
-                            if (!badge) {
-                                badge = document.createElement('div');
-                                badge.className = 'reason-badge';
-                                targetChip.appendChild(badge);
+                    // 로그인 상태 감지
+                    onAuthStateChanged(auth, (currentUser) => {
+                        if (currentUser) {
+                            // 이메일 도메인 체크 (보안)
+                            if (!currentUser.email.endsWith('@dimigo.hs.kr')) {
+                                alert("디미고 계정만 사용할 수 있습니다.");
+                                logout();
+                                return;
                             }
-                            badge.innerText = reason;
+                            user.value = currentUser;
+                            parseUserInfo(currentUser.displayName);
                         } else {
-                            if (badge) badge.remove();
+                            user.value = null;
                         }
+                    });
+
+                    // 눈 효과 실행
+                    startSnow();
+                });
+
+                // 사용자 정보 파싱 (예: "1224 조율희" -> 24번, 조율희)
+                const parseUserInfo = (displayName) => {
+                    // 구글 이름에서 숫자 4자리 추출
+                    const match = displayName.match(/(\d{4})\s*(.*)/);
+                    if (match) {
+                        const studentId = match[1]; // "1224"
+                        myName.value = match[2] || displayName; // "조율희"
+                        
+                        // 1224 -> 24 계산
+                        let seat = parseInt(studentId) - 1200;
+                        if (seat > 0 && seat <= 32 && seat !== 31) {
+                            mySeatNo.value = seat;
+                        } else {
+                            alert("유효하지 않은 학번입니다. (1201~1232)");
+                            logout();
+                        }
+                    } else {
+                        // 학번 파싱 실패 시 수동 입력 (간단히 처리)
+                        const inputId = prompt("학번 4자리를 입력해주세요 (예: 1224)");
+                        if(inputId) parseUserInfo(inputId + " " + displayName);
                     }
-                } else {
-                    console.log("자석을 찾을 수 없음:", studentName, studentId);
-                }
-            }
+                };
 
-            // [기타] 눈 효과 및 커스텀 일정표 (기존 유지)
-            (function() {
-                const canvas = document.getElementById('snow-canvas');
-                const ctx = canvas.getContext('2d');
-                let width = window.innerWidth, height = window.innerHeight;
-                canvas.width = width; canvas.height = height;
-                const flakes = [];
-                for(let i=0;i<100;i++) flakes.push({x:Math.random()*width,y:Math.random()*-height,r:Math.random()*2+1,s:Math.random()+0.5,o:Math.random()*0.5+0.3});
-                function draw() {
-                    ctx.clearRect(0,0,width,height); ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.beginPath();
-                    flakes.forEach(f=>{ ctx.globalAlpha=f.o; ctx.moveTo(f.x,f.y); ctx.arc(f.x,f.y,f.r,0,Math.PI*2); f.y+=f.s; if(f.y>height){f.y=-5;f.x=Math.random()*width;} });
-                    ctx.fill(); requestAnimationFrame(draw);
-                }
-                window.addEventListener('resize',()=>{width=window.innerWidth;height=window.innerHeight;canvas.width=width;canvas.height=height;}); draw();
-            })();
+                // 로그인
+                const googleLogin = () => {
+                    signInWithPopup(auth, provider).catch((error) => alert("로그인 실패: " + error.message));
+                };
 
-            const MY_TITLE="1차 지필평가"; const D_DAY_DATE="2024-12-16"; 
-            const MY_SCHEDULES=[{subject:'수학',content:'삼각함수 ~ 수열',color:'c-red'},{subject:'영어',content:'수능특강 3강, 4강',color:'c-blue'},{subject:'국어',content:'문학 작품 분석',color:'c-green'},{subject:'정보',content:'파이썬 수행평가',color:'c-yellow'}];
-            function calculateDDay(t){const d=new Date(t);const n=new Date();d.setHours(0,0,0,0);n.setHours(0,0,0,0);const x=Math.ceil((d-n)/864e5);return x===0?"D-Day":x>0?"D-"+x:"D+"+Math.abs(x);}
-            function renderMyBoard(){
-                const aside=document.querySelector('aside'); if(!aside)return;
-                const ori=aside.querySelector('.notice'); if(ori)ori.style.display='none';
-                if(!document.getElementById('my-dashboard-container')){
-                    const c=document.createElement('div'); c.id='my-dashboard-container';
-                    const u=document.createElement('ul'); u.id='my-custom-list'; u.className='notice-ul';
-                    const s=aside.querySelector('div'); if(s){aside.appendChild(c);aside.appendChild(u);}
-                }
-                const c=document.getElementById('my-dashboard-container');
-                const h=`<span class="my-title">${MY_TITLE}</span><span class="my-dday-badge">${calculateDDay(D_DAY_DATE)}</span>`;
-                if(c.innerHTML!==h)c.innerHTML=h;
-                const u=document.getElementById('my-custom-list');
-                const l=MY_SCHEDULES.map(i=>`<li class="${i.color}"><span class="type-tag">${i.subject}</span><span>${i.content}</span></li>`).join('');
-                if(u.innerHTML!==l)u.innerHTML=l;
+                // 로그아웃
+                const logout = () => {
+                    signOut(auth);
+                    user.value = null;
+                };
+
+                // 상태 업데이트 (DB 전송)
+                const updateStatus = (status) => {
+                    if (!mySeatNo.value) return;
+                    set(dbRef(db, 'students/' + mySeatNo.value), {
+                        name: myName.value,
+                        status: status,
+                        timestamp: Date.now()
+                    });
+                };
+
+                // 기타 사유 입력
+                const askEtc = () => {
+                    const reason = prompt("기타 사유를 입력하세요");
+                    if (reason) updateStatus(`기타(${reason})`);
+                };
+
+                // [PC] 좌석 데이터 가져오기
+                const getStudentName = (n) => students.value[n]?.name || '';
+                const getStudentStatus = (n) => students.value[n]?.status || '교실';
+                
+                // [PC] 좌석 스타일
+                const getSeatClass = (n) => {
+                    const status = getStudentStatus(n);
+                    return status === '교실' ? 'status-room' : 'status-away';
+                };
+                const getStatusColor = (n) => {
+                    const status = getStudentStatus(n);
+                    if (status === '교실') return '';
+                    if (status.includes('기타')) return 'text-yellow-400 bg-yellow-900/30';
+                    return 'text-red-400 bg-red-900/30';
+                };
+
+                // [PC] 통계
+                const totalStudents = 31; // 31번 제외 총 31명
+                const presentCount = computed(() => {
+                    let count = 0;
+                    for (let i = 1; i <= 32; i++) {
+                        if (i === 31) continue;
+                        const s = students.value[i]?.status || '교실';
+                        if (s === '교실') count++;
+                    }
+                    return count;
+                });
+                const awayCount = computed(() => totalStudents - presentCount.value);
+
+                return {
+                    isBoardMode, user, myName, mySeatNo, myStatus: computed(() => students.value[mySeatNo.value]?.status),
+                    googleLogin, logout, updateStatus, askEtc,
+                    getStudentName, getStudentStatus, getSeatClass, getStatusColor,
+                    totalStudents, presentCount, awayCount
+                };
             }
-            setInterval(renderMyBoard,100);
+        }).mount('#app');
+
+        // 눈 내리는 효과 (바닐라 JS)
+        function startSnow() {
+            const canvas = document.getElementById('snow-canvas');
+            const ctx = canvas.getContext('2d');
+            let width = window.innerWidth;
+            let height = window.innerHeight;
+            canvas.width = width; canvas.height = height;
+            const flakes = [];
+            for(let i=0; i<100; i++) flakes.push({x: Math.random()*width, y: Math.random()*-height, r: Math.random()*2+1, s: Math.random()*1+0.5});
+            function draw() {
+                ctx.clearRect(0,0,width,height);
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.beginPath();
+                flakes.forEach(f => {
+                    ctx.moveTo(f.x, f.y); ctx.arc(f.x, f.y, f.r, 0, Math.PI*2);
+                    f.y += f.s;
+                    if(f.y > height) { f.y = -5; f.x = Math.random() * width; }
+                });
+                ctx.fill(); requestAnimationFrame(draw);
+            }
+            window.addEventListener('resize', () => { width=window.innerWidth; height=window.innerHeight; canvas.width=width; canvas.height=height; });
+            draw();
         }
     </script>
-  </body>
+</body>
 </html>
