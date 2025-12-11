@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="initial-scale=1.0; maximum-scale=1.0; minimum-scale=1.0; user-scalable=no;" /> 
+    <title>학습 장소 현황판</title>
+    
+    <link rel="stylesheet" crossorigin href="style.css">
+    
+    <script type="module" crossorigin src="script.js"></script>
+
+    <style>
+      /* [1. 관리자 입력창 숨기기] */
+      .form { display: none !important; }
+
+      /* [2. 원래 일정판 통째로 삭제] */
+      .aside-announcement { display: none !important; }
+      ul.notice-ul:not(#my-custom-list) { display: none !important; }
+
+      /* [3. 우리가 만든 일정 디자인] */
+      #my-dashboard-container {
+          text-align: center;
+          margin-top: 15px;
+          margin-bottom: 20px;
+          animation: fadeIn 0.8s ease;
+      }
+      .my-title {
+          font-weight: 700;
+          font-size: 1.8rem;
+          color: var(--text);
+          display: block;
+          margin-bottom: 10px;
+      }
+      .my-dday-badge {
+          font-size: 1.5rem;
+          font-weight: 800;
+          color: #ff6b6b;
+          background: #ff6b6b22;
+          padding: 5px 15px;
+          border-radius: 50px;
+          display: inline-block;
+          margin-bottom: 15px;
+      }
+      
+      /* 내 리스트 스타일 */
+      #my-custom-list {
+          display: flex !important;
+          flex-direction: column;
+          gap: 10px;
+      }
+
+      /* [4. 팝업창 수정 스타일] - 사유 버튼 숨기기 */
+      /* 팝업 안에 있는 버튼(Chip)들을 숨깁니다. 단, '저장/취소' 버튼은 살려야 합니다. */
+      /* 정확한 클래스를 몰라 일반적인 패턴으로 잡습니다. */
+      .dialog-content button.chip,
+      .modal button.chip,
+      [role="dialog"] button.chip {
+          display: none !important;
+      }
+      
+      /* 입력창 스타일 보정 */
+      .dialog-content textarea,
+      .dialog-content input,
+      [role="dialog"] textarea,
+      [role="dialog"] input {
+          width: 100% !important;
+          min-height: 40px !important;
+          margin-top: 10px !important;
+      }
+
+      @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    
+    <script>
+        // 1. 제목
+        const MY_TITLE = "2차 지필평가"; 
+
+        // 2. 디데이 (YYYY-MM-DD)
+        const D_DAY_DATE = "2025-12-10"; 
+
+        // 3. 일정 목록
+        const MY_SCHEDULES = [
+            { subject: '시험일정안내', content: '', color: 'c-red' },
+            { subject: '12/12(금)', content: '인일, 수학', color: 'c-red' },
+        ];
+        // ==========================================
+
+        function calculateDDay(targetDate) {
+            const target = new Date(targetDate);
+            const today = new Date();
+            target.setHours(0,0,0,0);
+            today.setHours(0,0,0,0);
+            const diff = target - today;
+            const dayDiff = Math.ceil(diff / (1000 * 60 * 60 * 24));
+            if (dayDiff === 0) return "D-Day";
+            if (dayDiff > 0) return "D-" + dayDiff;
+            return "D+" + Math.abs(dayDiff);
+        }
+
+        function renderMyBoard() {
+            const aside = document.querySelector('aside');
+            
+            // [팝업창 버튼 숨기기 기능 추가] ------------------------
+            // 화면에 팝업(dialog)이 떠있는지 감시해서, 뜨면 버튼을 숨깁니다.
+            const dialog = document.querySelector('[role="dialog"]') || document.querySelector('.dialog') || document.querySelector('.modal');
+            if (dialog) {
+                // 팝업 안의 모든 버튼을 찾습니다.
+                const buttons = dialog.querySelectorAll('button');
+                buttons.forEach(btn => {
+                    // "저장", "취소", "확인" 같은 텍스트가 없는 버튼(=사유 선택 버튼)만 숨깁니다.
+                    const text = btn.innerText.trim();
+                    if (text !== '저장' && text !== '취소' && text !== '확인' && text !== 'X') {
+                        btn.style.display = 'none';
+                    }
+                });
+                
+                // "기존 사유" 같은 안내 문구가 있다면 숨김 (선택 사항)
+                const labels = dialog.querySelectorAll('p, span');
+                labels.forEach(label => {
+                    if (label.innerText.includes('기존') || label.innerText.includes('사유 선택')) {
+                        label.style.display = 'none';
+                    }
+                });
+            }
+            // ----------------------------------------------------
+
+            if (!aside) return; 
+
+            // 원래 일정판 숨기기
+            const originalNotice = aside.querySelector('.notice');
+            if (originalNotice) originalNotice.style.display = 'none';
+
+            // 내 보드 생성
+            if (!document.getElementById('my-dashboard-container')) {
+                const container = document.createElement('div');
+                container.id = 'my-dashboard-container';
+                
+                const ul = document.createElement('ul');
+                ul.id = 'my-custom-list';
+                ul.className = 'notice-ul';
+
+                const statsDiv = aside.querySelector('div'); 
+                if (statsDiv) {
+                    aside.appendChild(container);
+                    aside.appendChild(ul);
+                } else {
+                    aside.appendChild(container);
+                    aside.appendChild(ul);
+                }
+            }
+
+            // 내용 업데이트
+            const ddayText = calculateDDay(D_DAY_DATE);
+            const container = document.getElementById('my-dashboard-container');
+            const newHeaderHTML = `
+                <span class="my-title">${MY_TITLE}</span>
+                <span class="my-dday-badge">${ddayText}</span>
+            `;
+            if (container.innerHTML !== newHeaderHTML) container.innerHTML = newHeaderHTML;
+
+            const ul = document.getElementById('my-custom-list');
+            const newListHTML = MY_SCHEDULES.map(item => `
+                <li class="${item.color}">
+                    <span class="type-tag">${item.subject}</span>
+                    <span>${item.content}</span>
+                </li>
+            `).join('');
+            if (ul.innerHTML !== newListHTML) ul.innerHTML = newListHTML;
+        }
+
+        // 0.1초마다 실행 (일정표도 그리고, 팝업창도 감시합니다)
+        setInterval(renderMyBoard, 100);
+    </script>
+    
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"c6be42378ecd4c3f942d4edf079a385d","r":1,"server_timing":{"name":{"cfCacheStatus":true}}}'></script>
+  </body>
+<div id="custom-modal-overlay" class="modal-overlay" style="display: none;">
+        
+        <div class="window-reason">
+            <h3 class="window-title">기타 이동 사유 입력</h3>
+            
+            <p class="section-title">입력</p>
+            <div class="input-wrapper">
+                <input type="text" id="custom-reason-input" class="modal-input" placeholder="사유를 입력하세요 (예: 병원)" autocomplete="off">
+            </div>
+
+            <div id="recent-reasons-container" style="display: none;">
+                <p class="sub-label">최근 사용 / 고정</p>
+                <div id="recent-reasons-list" class="chip-container"></div>
+            </div>
+
+            <div class="modal-buttons">
+                <button id="modal-btn-cancel" class="modal-btn cancel">취소</button>
+                <button id="modal-btn-save" class="modal-btn save">확인</button>
+            </div>
+        </div>
+
+        <div class="window-project">
+            <h3 class="window-title">프로젝트실 목록</h3>
+            <div class="table-container">
+                <table class="project-table">
+                    <thead>
+                        <tr>
+                            <th width="35%">위치</th>
+                            <th width="65%">명칭</th>
+                        </tr>
+                    </thead>
+                    <tbody id="project-table-body">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <style>
+        /* [1] 배경 (전체 컨테이너) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); z-index: 9999;
+            /* 플렉스로 두 창을 나란히 배치 */
+            display: flex; 
+            align-items: center; /* 수직 중앙 정렬 */
+            justify-content: center; /* 수평 중앙 정렬 */
+            gap: 40px; /* ★ 두 창 사이의 간격 (이걸로 분리됨) ★ */
+            backdrop-filter: blur(5px); animation: fadeIn 0.2s ease;
+            padding: 20px; box-sizing: border-box;
+        }
+
+        /* [2] 공통 창 스타일 (독립된 카드 형태) */
+        .window-reason, .window-project {
+            background: #1e2025;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            display: flex; flex-direction: column;
+            max-height: 80vh; /* 화면 꽉 차지 않게 */
+        }
+
+        /* 왼쪽 창 크기 */
+        .window-reason {
+            width: 400px; /* 고정 너비 혹은 flex */
+            z-index: 2;
+        }
+
+        /* 오른쪽 창 크기 */
+        .window-project {
+            width: 350px;
+            height: 500px; /* 세로로 조금 길게 */
+            z-index: 1;
+        }
+
+        /* 모바일 대응 (화면 좁으면 위아래로 배치) */
+        @media (max-width: 850px) {
+            .modal-overlay { flex-direction: column; overflow-y: auto; }
+            .window-reason, .window-project { width: 100%; max-width: 500px; height: auto; }
+            .window-project { height: 300px; } /* 모바일에서 높이 줄임 */
+        }
+
+        /* 제목 스타일 */
+        .window-title {
+            color: #fff; margin: 0 0 20px 0; font-size: 1.3rem; font-weight: 700;
+            padding-bottom: 15px; border-bottom: 1px solid #333;
+            text-align: center;
+        }
+        .section-title { color: #ffffff; font-size: 0.95rem; font-weight: 600; margin-bottom: 10px; }
+        .sub-label { color: #888; font-size: 0.8rem; margin-bottom: 8px; margin-top: 15px; }
+
+        /* [3] 입력창 스타일 */
+        .modal-input {
+            width: 100%; padding: 14px; border-radius: 8px;
+            border: 1px solid #444; background: #2a2d35; color: white;
+            font-size: 1.1rem; outline: none; box-sizing: border-box;
+        }
+        .modal-input:focus { border-color: #ffffff; background: #252830; }
+
+        /* [4] 최근 사유 버튼 */
+        .chip-container { display: flex; flex-wrap: wrap; gap: 8px; }
+        .recent-reason-btn {
+            background: #2a2d35; border: 1px solid #444; color: #ccc;
+            padding: 8px 12px; border-radius: 20px; font-size: 0.9rem;
+            cursor: pointer; transition: 0.2s;
+        }
+        .recent-reason-btn:hover { background: #333; border-color: #777; color: #fff; }
+
+        /* [5] ★ 프로젝트실 표 (오른쪽 창 전용) ★ */
+        .table-container {
+            flex-grow: 1; overflow-y: auto; 
+            border: 1px solid #333; border-radius: 8px;
+            background: #15171c;
+        }
+        .project-table {
+            width: 100%; border-collapse: collapse; text-align: center; font-size: 0.9rem;
+        }
+        .project-table th {
+            background: #252830; color: #ccc; padding: 12px; 
+            border-bottom: 1px solid #444;
+            position: sticky; top: 0; z-index: 10;
+        }
+        .project-table td {
+            border-bottom: 1px solid #333; padding: 8px; color: #aaa; vertical-align: middle;
+        }
+        .project-table tr:hover { background: #2a2d35; }
+        
+        /* 표 안의 선택 버튼 */
+        .table-select-btn {
+            background: #2563eb; color: white; border: none;
+            padding: 6px 0; border-radius: 4px; cursor: pointer;
+            font-size: 0.9rem; width: 90%; font-weight: 500;
+            transition: 0.2s;
+        }
+        .table-select-btn:hover { background: #1d4ed8; transform: scale(1.02); }
+
+        /* [6] 하단 버튼 (왼쪽 창에만 있음) */
+        .modal-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: auto; padding-top: 20px; }
+        .modal-btn { padding: 10px 24px; border-radius: 8px; border: none; cursor: pointer; font-weight: 700; font-size: 1rem; }
+        .modal-btn.cancel { background: #333; color: #ccc; }
+        .modal-btn.cancel:hover { background: #444; color: #fff; }
+        .modal-btn.save { background: #2563eb; color: white; }
+        .modal-btn.save:hover { background: #1d4ed8; }
+    </style>
+
+    <script>
+        // ==========================================
+        // [데이터 설정]
+        // ==========================================
+        const PROJECT_ROOM_DATA = [
+            { loc: "본관3층", name: "301호" },
+            { loc: "", name: "302호" },
+            { loc: "", name: "303호" },
+            { loc: "", name: "304호" },
+            { loc: "", name: "305호" },
+            { loc: "", name: "306호" },
+            { loc: "", name: "307호" },
+            { loc: "본관2층", name: "201호" },
+            { loc: "", name: "202호" },
+            { loc: "", name: "203호" },
+            { loc: "", name: "회계실무실습실" },
+            { loc: "", name: "광고콘텐츠제작실습실" },
+            { loc: "본관1층", name: "비즈쿨실" },
+            { loc: "", name: "보건실" },
+            { loc: "신관1층", name: "세미나실" },
+            { loc: "", name: "사물인터넷실" },
+            { loc: "", name: "시청각실" },
+            { loc: "", name: "휴머노이드실" },
+            { loc: "", name: "IT프로젝트실" },
+            { loc: "신관2층", name: "멀티미디어실" },
+            { loc: "", name: "크리에이터스튜디오실" },
+            { loc: "", name: "음악실" },
+            { loc: "신관3층", name: "애니메이션콘텐츠제작실 (3D실)" },
+            { loc: "", name: "빅데이터분석실" },
+            { loc: "학봉관/우정학사", name: "기숙사" },
+            { loc: "", name: "미술실" },
+        ];
+
+        const RECENT_REASONS_KEY = 'my_recent_reasons'; 
+        const FIXED_REASONS = ['조기입실', '외출'];
+        const BLACKLIST_KEYWORDS = ['도티','공룡','띠또','잠뜰','쵸쵸우','코아','샌드박스','칠각별','각별','수현'];
+
+        function getRecentReasons() {
+            const json = localStorage.getItem(RECENT_REASONS_KEY);
+            return json ? JSON.parse(json) : [];
+        }
+
+        function addRecentReason(reason) {
+            for (const keyword of BLACKLIST_KEYWORDS) { if (reason.includes(keyword)) return; }
+            if (FIXED_REASONS.includes(reason)) return;
+
+            let list = getRecentReasons();
+            list = list.filter(r => r !== reason);
+            list.unshift(reason);
+            if (list.length > 5) list.pop();
+            localStorage.setItem(RECENT_REASONS_KEY, JSON.stringify(list));
+        }
+
+        // ==========================================
+        // 팝업창 실행 로직
+        // ==========================================
+        window.openEtcModal = function(studentName, targetLane, callback) {
+            const overlay = document.getElementById('custom-modal-overlay');
+            const input = document.getElementById('custom-reason-input');
+            const btnSave = document.getElementById('modal-btn-save');
+            const btnCancel = document.getElementById('modal-btn-cancel');
+            
+            const recentContainer = document.getElementById('recent-reasons-container');
+            const recentList = document.getElementById('recent-reasons-list');
+            const tableBody = document.getElementById('project-table-body');
+
+            // 1. 초기화 및 열기
+            input.value = ''; 
+            overlay.style.display = 'flex';
+            input.focus();
+
+            // 2. 왼쪽 창: 최근 사유 버튼 생성
+            const savedReasons = getRecentReasons();
+            const allReasons = [...savedReasons, ...FIXED_REASONS];
+            recentList.innerHTML = '';
+            
+            if (allReasons.length > 0) {
+                recentContainer.style.display = 'block';
+                allReasons.forEach(reasonText => {
+                    const btn = document.createElement('button');
+                    btn.className = 'recent-reason-btn';
+                    if (FIXED_REASONS.includes(reasonText)) {
+                        btn.style.borderColor = '#5ac4ff';
+                        btn.style.color = '#5ac4ff';
+                    }
+                    btn.innerText = reasonText;
+                    btn.onclick = () => { input.value = reasonText; input.focus(); };
+                    recentList.appendChild(btn);
+                });
+            } else {
+                recentContainer.style.display = 'none';
+            }
+
+            // 3. 오른쪽 창: 프로젝트실 표 생성
+            tableBody.innerHTML = '';
+            PROJECT_ROOM_DATA.forEach(data => {
+                const tr = document.createElement('tr');
+                
+                // 위치 컬럼
+                const tdLoc = document.createElement('td');
+                tdLoc.innerText = data.loc;
+                tdLoc.style.fontWeight = "bold";
+                
+                // 명칭 컬럼 (버튼)
+                const tdName = document.createElement('td');
+                const btn = document.createElement('button');
+                btn.className = 'table-select-btn';
+                btn.innerText = data.name;
+                
+                // [기능] 버튼 클릭 -> 왼쪽 창 입력란에 자동 입력
+                btn.onclick = () => {
+                    const fullName = `${data.loc} ${data.name}`;
+                    input.value = fullName;
+                    input.focus(); // 왼쪽 창으로 포커스 이동
+                };
+                
+                tdName.appendChild(btn);
+                tr.appendChild(tdLoc);
+                tr.appendChild(tdName);
+                tableBody.appendChild(tr);
+            });
+
+            // 4. 저장 및 닫기
+            const onSave = () => {
+                const reason = input.value.trim();
+                if (!reason) {
+                    alert("사유를 입력해주세요!");
+                    input.focus();
+                    return;
+                }
+                addRecentReason(reason);
+                overlay.style.display = 'none';
+                callback(reason);
+                cleanup();
+            };
+
+            const onCancel = () => {
+                overlay.style.display = 'none';
+                cleanup();
+            };
+
+            const cleanup = () => {
+                btnSave.removeEventListener('click', onSave);
+                btnCancel.removeEventListener('click', onCancel);
+                input.removeEventListener('keydown', onEnter);
+            };
+
+            const onEnter = (e) => {
+                if(e.key === 'Enter') onSave();
+            };
+
+            btnSave.addEventListener('click', onSave);
+            btnCancel.addEventListener('click', onCancel);
+            input.addEventListener('keydown', onEnter);
+        };
+    </script>
+
+    <style>
+        .recent-reason-btn {
+            background: #2a2d35;
+            border: 1px solid #444;
+            color: #ddd;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .recent-reason-btn:hover {
+            background: #333;
+            border-color: #666;
+            color: white;
+        }
+    </style>
+</html>
