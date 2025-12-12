@@ -28,7 +28,6 @@
       .feature-btn { background: #2a2d35 !important; border: 1px solid #444 !important; color: #ffffff !important; padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
       .feature-btn:hover { background: #333 !important; border-color: #666 !important; }
 
-      /* 눈 내리기 스위치 */
       .switch { position: relative; display: inline-block; width: 34px; height: 18px; margin-left: auto; }
       .switch input { opacity: 0; width: 0; height: 0; }
       .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .4s; border-radius: 20px; }
@@ -36,69 +35,219 @@
       input:checked + .slider { background-color: #2563eb; }
       input:checked + .slider:before { transform: translateX(16px); }
 
-      /* BGM 리스트 */
       #inline-bgm-container { display: none; margin-top: 5px; background: #15171c !important; border-radius: 8px; border: 1px solid #444; overflow: hidden; max-height: 180px; overflow-y: auto; }
       #inline-bgm-container.active { display: block !important; }
-      .inline-bgm-item { display: flex; align-items: center; gap: 10px; padding: 10px; border-bottom: 1px solid #222; cursor: pointer; }
-      .inline-bgm-item:hover { background: #252830; }
-      .inline-bgm-cover { width: 30px; height: 30px; border-radius: 4px; object-fit: cover; }
-      .inline-bgm-title { font-size: 0.8rem; font-weight: bold; color: #fff; }
+      .inline-bgm-item { display: flex !important; align-items: center !important; gap: 12px !important; padding: 10px !important; border-bottom: 1px solid #222 !important; cursor: pointer; }
+      .inline-bgm-item:hover { background: #252830 !important; }
+      .inline-bgm-cover { width: 30px !important; height: 30px !important; border-radius: 4px !important; object-fit: cover; }
+      .inline-bgm-title { font-size: 0.8rem !important; font-weight: bold !important; color: #fff !important; }
 
-      /* [3. 미니 플레이어 - 크기 확대] */
+      /* [3. 미니 플레이어 - 확장 기능 반영] */
       #mini-player {
           position: fixed; bottom: 30px; left: 30px; z-index: 10000;
           display: flex; align-items: center; gap: 15px;
           background: rgba(15, 17, 21, 0.95); padding: 12px 22px 12px 12px;
           border-radius: 60px; border: 1px solid #444;
           box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(10px);
-          transition: all 0.4s; width: auto; min-width: 220px; cursor: pointer; transform: translateY(150%);
+          transition: all 0.4s; width: auto; min-width: 220px;
+          cursor: pointer; transform: translateY(150%);
       }
       #mini-player.active { transform: translateY(0); }
       #mini-player.expanded { border-radius: 25px; padding: 25px; flex-direction: column; max-width: 220px; bottom: 40px; left: 40px; }
+      
       .vinyl-record { width: 55px; height: 55px; border-radius: 50%; background-size: cover; background-position: center; border: 3px solid #222; animation: spin 4s linear infinite; animation-play-state: paused; transition: 0.4s; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
       #mini-player.expanded .vinyl-record { width: 140px; height: 140px; margin-bottom: 15px; }
       .vinyl-record.playing { animation-play-state: running; }
       @keyframes spin { 100% { transform: rotate(360deg); } }
+      
       .player-info { color: white; display: flex; flex-direction: column; gap: 5px; }
       #mini-player.expanded .player-info { text-align: center; align-items: center; }
       .player-title { font-size: 0.9rem; font-weight: bold; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      #mini-player.expanded .player-title { font-size: 1.1rem; max-width: 180px; white-space: normal; margin-bottom: 15px; }
+
       .player-ctrl-box { display: flex; gap: 20px; align-items: center; }
-      .ctrl-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 1.3rem; transition: 0.2s; }
-      .ctrl-btn:hover { color: #5ac4ff; }
+      .ctrl-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 1.3rem; transition: 0.2s; padding: 5px; }
 
       /* [4. 시간표 & 급식 모달 - 정렬 수정] */
       .modal-overlay { position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; background: rgba(0, 0, 0, 0.85) !important; z-index: 20000 !important; display: none; align-items: center !important; justify-content: center !important; backdrop-filter: blur(5px) !important; }
       .modal-window { background: #1e2025 !important; border: 1px solid #333 !important; border-radius: 16px !important; padding: 30px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.6) !important; display: flex !important; flex-direction: column !important; max-width: 650px; width: 90% !important; }
-      
-      /* 시간표 테이블 정렬 핵심 CSS */
-      .timetable-table { 
-          width: 100% !important; border-collapse: collapse !important; margin-top: 20px !important; 
-          color: #eee !important; text-align: center !important; table-layout: fixed !important; /* 모든 칸 너비 동일하게 */
-      }
+      .timetable-table { width: 100% !important; border-collapse: collapse !important; margin-top: 20px !important; color: #eee !important; text-align: center !important; table-layout: fixed !important; }
       .timetable-table th { background: #2a2d35 !important; padding: 12px 5px !important; border: 1px solid #444 !important; color: #5ac4ff !important; font-size: 0.9rem; }
-      .timetable-table td { padding: 12px 5px !important; border: 1px solid #333 !important; background: #15171c !important; font-size: 0.85rem; height: 45px; overflow: hidden; text-overflow: ellipsis; }
+      .timetable-table td { padding: 12px 5px !important; border: 1px solid #333 !important; background: #15171c !important; font-size: 0.85rem; height: 45px; }
 
-      /* [5. 기타 사유 독립 레이아웃 복구] */
-      .etc-overlay { position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; background: rgba(0, 0, 0, 0.8) !important; z-index: 15000 !important; display: none; align-items: center !important; justify-content: center !important; gap: 40px !important; backdrop-filter: blur(5px) !important; animation: fadeIn 0.2s ease; }
-      .window-reason, .window-project { background: #1e2025 !important; border: 1px solid #333 !important; border-radius: 12px !important; padding: 25px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.6) !important; display: flex !important; flex-direction: column !important; max-height: 85vh !important; }
-      .window-reason { width: 420px !important; } .window-project { width: 380px !important; height: 520px !important; }
-      .window-title { color: #fff !important; margin: 0 0 20px 0 !important; font-size: 1.3rem !important; font-weight: 700 !important; border-bottom: 1px solid #333 !important; padding-bottom: 15px !important; text-align: center !important; }
-      .modal-input { width: 100% !important; padding: 14px !important; border-radius: 8px !important; border: 1px solid #444 !important; background: #2a2d35 !important; color: white !important; font-size: 1.1rem !important; outline: none !important; box-sizing: border-box !important; }
-      .chip-container { display: flex !important; flex-wrap: wrap !important; gap: 10px !important; margin-top: 20px !important; }
-      .recent-reason-btn { background: rgba(255, 255, 255, 0.08) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: #eee !important; padding: 8px 14px !important; border-radius: 10px !important; font-size: 0.85rem !important; cursor: pointer !important; transition: 0.2s !important; backdrop-filter: blur(5px) !important; }
-      .recent-reason-btn:hover { background: #2563eb !important; color: white !important; }
-      .table-container { flex-grow: 1 !important; overflow-y: auto !important; border: 1px solid #333 !important; border-radius: 8px !important; background: #15171c !important; }
-      .project-table { width: 100% !important; border-collapse: collapse !important; text-align: center !important; font-size: 0.9rem !important; color: #aaa !important; }
-      .project-table th { background: #252830 !important; color: #ccc !important; padding: 12px !important; border-bottom: 1px solid #444 !important; position: sticky !important; top: 0 !important; }
-      .project-table td { padding: 10px !important; border-bottom: 1px solid #222 !important; }
-      .table-select-btn { background: #2563eb !important; color: white !important; border: none !important; padding: 8px 0 !important; border-radius: 6px !important; cursor: pointer !important; width: 90% !important; font-weight: 600 !important; }
+      /* [5. 기타 사유 레이아웃] */
+        /* 기타 사유 전체 배경 및 두 창 배치 */
+        .etc-overlay { 
+            position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; 
+            background: rgba(0, 0, 0, 0.8) !important; z-index: 15000 !important; 
+            display: none; align-items: center !important; justify-content: center !important; 
+            gap: 40px !important; backdrop-filter: blur(5px) !important; 
+        }
 
+        /* 왼쪽 입력창 박스 & 오른쪽 리스트 박스 공통 */
+        .window-reason, .window-project { 
+            background: #1e2025 !important; border: 1px solid #333 !important; border-radius: 12px !important; 
+            padding: 25px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.6) !important; 
+            display: flex !important; flex-direction: column !important; max-height: 85vh !important;
+        }
+        .window-reason { width: 420px !important; }
+        .window-project { width: 380px !important; height: 520px !important; }
+
+        /* 입력창 내부 스타일 (흰색 배경 방지) */
+        .modal-input { 
+            width: 100% !important; padding: 14px !important; border-radius: 8px !important; 
+            border: 1px solid #444 !important; background: #2a2d35 !important; 
+            color: white !important; font-size: 1.1rem !important; outline: none !important; box-sizing: border-box !important; 
+        }
+
+        /* 최근 사유 버튼(칩) 디자인 */
+        .chip-container { display: flex !important; flex-wrap: wrap !important; gap: 10px !important; margin-top: 20px !important; }
+        .recent-reason-btn { 
+            background: rgba(255, 255, 255, 0.08) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+            color: #eee !important; padding: 8px 14px !important; border-radius: 10px !important; font-size: 0.85rem !important; 
+            cursor: pointer !important; transition: 0.2s !important; backdrop-filter: blur(5px) !important;
+        }
+        .recent-reason-btn:hover { background: #2563eb !important; border-color: #3b82f6 !important; color: white !important; }
+
+        /* 프로젝트실 표 스타일 */
+        .table-container { flex-grow: 1 !important; overflow-y: auto !important; border: 1px solid #333 !important; border-radius: 8px !important; background: #15171c !important; }
+        .project-table { width: 100% !important; border-collapse: collapse !important; text-align: center !important; font-size: 0.95rem !important; color: #aaa !important; }
+        .project-table th { background: #252830 !important; color: #ccc !important; padding: 12px !important; border-bottom: 1px solid #444 !important; position: sticky !important; top: 0 !important; }
+        .project-table td { padding: 10px !important; border-bottom: 1px solid #222 !important; }
+        .table-select-btn { background: #2563eb !important; color: white !important; border: none !important; padding: 8px 0 !important; border-radius: 6px !important; cursor: pointer !important; width: 90% !important; font-weight: 600 !important; }
       /* [6. 차단 팝업] */
-      #restriction-popup { position: fixed !important; top: 20px !important; left: 50% !important; transform: translateX(-50%) !important; z-index: 30000 !important; background: #ef4444 !important; color: white !important; padding: 15px 25px !important; border-radius: 12px !important; display: none; box-shadow: 0 10px 40px rgba(239, 68, 68, 0.4) !important; align-items: center !important; gap: 15px !important; animation: slideDown 0.4s ease; }
+      #restriction-popup { position: fixed !important; top: 20px !important; left: 50% !important; transform: translateX(-50%) !important; z-index: 30000 !important; background: #ef4444 !important; color: white !important; padding: 18px 30px !important; border-radius: 15px !important; display: none; box-shadow: 0 10px 40px rgba(239, 68, 68, 0.4) !important; align-items: center !important; gap: 15px !important; animation: slideDown 0.4s ease; }
       .admin-input { width: 55px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.3); color: white; font-size: 0.8rem; padding: 4px; border-radius: 4px; outline: none; text-align: center; }
 
       @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       @keyframes slideDown { from { top: -100px; } to { top: 20px; } }
+
+      /* 갤러리 모달 배경 */
+        .gallery-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); z-index: 25000;
+            display: none; align-items: center; justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        /* 갤러리 창 */
+        .gallery-window {
+            background: #2a2d35; border: 1px solid #444; border-radius: 16px;
+            padding: 30px; width: 90%; max-width: 900px; height: 80vh;
+            display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        /* 사진 그리드 */
+        .gallery-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 40px; padding: 20px; overflow-y: auto; flex-grow: 1;
+            background: rgba(0,0,0,0.2); border-radius: 10px;
+        }
+
+        /* 폴라로이드 프레임 */
+        .photo-frame {
+            background: #ffffff; padding: 12px 12px 35px 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3); position: relative;
+            width: 160px; transition: transform 0.3s;
+        }
+
+        .photo-frame img { width: 100%; height: 140px; object-fit: cover; border: 1px solid #eee; }
+
+        .photo-caption {
+            color: #222; font-size: 0.8rem; text-align: center; margin-top: 10px;
+            font-weight: bold; font-family: sans-serif;
+        }
+
+        /* 테이프 효과 */
+        .photo-frame::before {
+            content: ""; position: absolute; top: -15px; left: 50%;
+            transform: translateX(-50%) rotate(-2deg);
+            width: 70px; height: 25px;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(2px); border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        /* 갤러리 내 버튼 박스 */
+        .gallery-btn-box {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+            justify-content: center;
+            width: 100%;
+        }
+
+        .gallery-action-btn {
+            padding: 6px 10px;
+            font-size: 0.7rem;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+            color: #333;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .gallery-action-btn:hover {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+
+        /* 사진 크게보기 모달 */
+        #largePhotoModal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.95); z-index: 30000;
+            display: none; align-items: center; justify-content: center;
+            cursor: zoom-out;
+        }
+
+        #largePhotoModal img {
+            max-width: 90%; max-height: 90%;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            border: 5px solid white;
+            border-radius: 4px;
+        }
+
+        /* [중앙 메인 영역 반투명 설정] */
+        section, .section {
+            background: rgba(15, 17, 21, 0.0) !important; /* 배경색을 70% 정도로 투명하게 */
+            backdrop-filter: blur(10px); /* 뒤쪽 배경을 흐릿하게 만들어 글자 가독성 확보 */
+            border: 1px solid rgba(255, 255, 255, 0.1); /* 테두리를 살짝 주어 경계선 구분 */
+            border-radius: 16px; /* 모서리를 둥글게 */
+        }
+
+        /* 만약 각 줄(Lane)도 투명하게 하고 싶다면 아래 코드도 추가하세요 */
+        .lane {
+            background: rgba(255, 255, 255, 0.03) !important; /* 매우 얇은 흰색 투명도 */
+            border-radius: 12px;
+            margin: 5px;
+        }
+
+        /* 자석(칩)들이 너무 투명해지지 않도록 그림자 보정 */
+        .chip {
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        /* 전반적인 UI 유리 효과 통합 설정 */
+        .topbar, 
+        section, 
+        .section, 
+        .aside-summary {
+            background: rgba(15, 17, 21, 0.0) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px; /* topbar의 경우 상단이 둥글어지는 게 싫다면 아래 별도 처리 */
+        }
+
+        /* 상단바만 모서리 둥글기 제거 (선택 사항) */
+        .topbar {
+            border-radius: 0 !important;
+            border-top: none !important;
+            border-left: none !important;
+            border-right: none !important;
+        }
     </style>
   </head>
   <body>
@@ -107,21 +256,32 @@
 
     <div id="custom-modal-overlay" class="etc-overlay">
         <div class="window-reason">
-            <h3 class="window-title">기타 이동 사유 입력</h3>
+            <h3 class="window-title" style="color:#fff; font-size:1.3rem; font-weight:700; border-bottom:1px solid #333; padding-bottom:15px; text-align:center; margin-bottom:20px;">기타 이동 사유 입력</h3>
             <p style="color:#fff; font-size:0.9rem; margin-bottom:10px; font-weight:600;">📝 사유 입력</p>
-            <input type="text" id="custom-reason-input" class="modal-input" placeholder="사유 직접 입력" autocomplete="off">
+            <input type="text" id="custom-reason-input" class="modal-input" placeholder="사유를 직접 입력하세요" autocomplete="off">
+            
             <div id="recent-reasons-container" style="display: none;">
-                <p style="color:#888; font-size:0.75rem; margin:20px 0 8px;">최근 사유</p>
+                <p style="color:#888; font-size:0.75rem; margin:20px 0 8px;">최근 사용 / 고정</p>
                 <div id="recent-reasons-list" class="chip-container"></div>
             </div>
+            
             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:auto; padding-top:20px;">
                 <button id="modal-btn-cancel" style="background:#333; color:#ccc; border:none; padding:12px 25px; border-radius:10px; cursor:pointer; font-weight:700;">취소</button>
                 <button id="modal-btn-save" style="background:#2563eb; color:white; border:none; padding:12px 25px; border-radius:10px; cursor:pointer; font-weight:700;">확인</button>
             </div>
         </div>
+
         <div class="window-project">
-            <h3 class="window-title">프로젝트실 목록</h3>
-            <div class="table-container"><table class="project-table"><thead><tr><th width="35%">위치</th><th width="65%">명칭</th></tr></thead><tbody id="project-table-body"></tbody></table></div>
+            <h3 class="window-title" style="color:#fff; font-size:1.3rem; font-weight:700; border-bottom:1px solid #333; padding-bottom:15px; text-align:center; margin-bottom:20px;">프로젝트실 목록</h3>
+            <div class="table-container">
+                <table class="project-table">
+                    <thead>
+                        <tr><th width="35%">위치</th><th width="65%">명칭</th></tr>
+                    </thead>
+                    <tbody id="project-table-body">
+                        </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -132,7 +292,7 @@
                 <select id="gradeSelector" style="background:#2a2d35; color:#fff; border:1px solid #444; padding:5px; border-radius:6px;"></select>
                 <select id="classSelector" style="background:#2a2d35; color:#fff; border:1px solid #444; padding:5px; border-radius:6px;"></select>
             </div>
-            <div id="timetableContainer" style="max-height: 450px; overflow-y: auto;"></div>
+            <div id="timetableContainer" style="max-height: 400px; overflow-y: auto;"></div>
             <button onclick="closeModal('timetableModal')" style="margin-top:20px; background:#333; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer; font-weight:700;">닫기</button>
         </div>
     </div>
@@ -140,14 +300,14 @@
     <div id="mealModal" class="modal-overlay">
         <div class="modal-window">
             <h2 style="color:white; margin:0 0 15px 0;"><i class="fas fa-utensils"></i> 오늘의 점심급식</h2>
-            <div id="mealContainer" style="line-height:2.0; color:#ddd; text-align:center; font-size:1.1rem; background:#15171c; padding:25px; border-radius:12px;">로딩 중...</div>
+            <div id="mealContainer" style="line-height:2.0; color:#ddd; text-align:center; font-size:1.1rem; background:#15171c; padding:20px; border-radius:10px;">급식 로딩 중...</div>
             <button onclick="closeModal('mealModal')" style="margin-top:20px; background:#333; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer; font-weight:700;">닫기</button>
         </div>
     </div>
 
     <div id="restriction-popup">
         <input type="password" id="admin-pw" class="admin-input" placeholder="PASS" maxlength="4">
-        <div style="flex:1"><b style="display:block">🚫 재생 불가 시간</b><small id="restriction-msg"></small></div>
+        <div style="flex:1"><b id="restrict-title" style="display:block">🚫 재생 불가 시간</b><small id="restriction-msg"></small></div>
     </div>
 
     <div id="mini-player" onclick="toggleExpand(event)">
@@ -162,205 +322,394 @@
         <audio id="bgm-audio"></audio>
     </div>
 
+
+
     <script>
-        // [설정 데이터]
-        const MEAL_KEY = '819b209aef6e4bc6921421155d08c60f';
-        const TIME_KEY = 'fb54814355634dc9b29c7bb7b7bd028c';
-        const BGM_LIST = [
-            { title: "Jane Doe (christmas)", cover: "./asset/IMG_0319.jpg", src: "./asset/Jane Doe.mp3" },
-            { title: "노래 신청받아요", cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100", src: "./assets/piano.mp3" }
+// ==========================================
+// [1] 설정 데이터 (API 키, BGM, 갤러리)
+// ==========================================
+const MEAL_KEY = '819b209aef6e4bc6921421155d08c60f';
+const TIME_KEY = 'fb54814355634dc9b29c7bb7b7bd028c';
+const KMA_KEY = 'nLdG_5HgQ9a3Rv-R4EPWMg'; // 기상청 허브 키
+const ADMIN_PW = "1224";
+
+const BGM_LIST = [
+    { title: "Jane Doe (christmas)", cover: "./asset/IMG_0319.jpg", src: "./asset/Jane Doe.mp3" },
+    { title: "노래 신청받아요", cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100", src: "./assets/piano.mp3" }
+];
+
+const GALLERY_DATA = [
+    { url: "./gallery/24_dicon.png", caption: "봄날 24기디컨" },
+    { url: "./gallery/bizcool.png", caption: "비즈쿨 Festa!!" },
+    { url: "./gallery/eventbg-1.png", caption: "크리스마스배경" },
+    { url: "./gallery/eventbg-1.png", caption: "크리스마스배경" },
+    { url: "./gallery/eventbg-1.png", caption: "크리스마스배경" },
+    { url: "./gallery/eventbg-1.png", caption: "크리스마스배경" },
+    { url: "./gallery/eventbg-1.png", caption: "크리스마스배경" },
+    { url: "./gallery/eventbg-1.png", caption: "크리스마스배경" },
+];
+
+const PROJECT_DATA = [
+    { loc: "본관3층", name: "301호" }, { loc: "", name: "302호" }, { loc: "", name: "303호" }, { loc: "", name: "304호" }, { loc: "", name: "305호" }, { loc: "", name: "306호" }, { loc: "", name: "307호" },
+    { loc: "본관2층", name: "201호" }, { loc: "", name: "202호" }, { loc: "", name: "203호" }, { loc: "", name: "회계실무실" }, { loc: "", name: "광고콘텐츠실" },
+    { loc: "본관1층", name: "비즈쿨실" }, { loc: "", name: "보건실" },
+    { loc: "신관1층", name: "세미나실" }, { loc: "", name: "IoT실" }, { loc: "", name: "시청각실" }, { loc: "", name: "휴머노이드실" }, { loc: "신관2층", name: "멀티미디어실" },
+    { loc: "신관3층", name: "3D실" }, { loc: "기숙사", name: "학봉관/우정학사" }
+];
+
+// 전역 상태 변수
+let isPlaying = false;
+let currentBgmData = null;
+let popupTimer = null;
+let isSnowActive = true;
+
+// ==========================================
+// [2] 시간 제한 및 우회 로직
+// ==========================================
+function checkTimeRestriction() {
+    const bypassUntil = localStorage.getItem('music_bypass_until');
+    if (bypassUntil && Date.now() < parseInt(bypassUntil)) return { restricted: false };
+
+    const now = new Date();
+    const day = now.getDay();
+    const time = now.getHours() * 100 + now.getMinutes();
+
+    if (day >= 1 && day <= 5) { // 월~금
+        const ranges = [
+            { s: 850,  e: 1250, m: "오전 수업 시간" }, { s: 1347, e: 1630, m: "오후 수업 시간" },
+            { s: 1708, e: 1835, m: "방과후 시간" }, { s: 1945, e: 2110, m: "야자 1타임" }, { s: 2129, e: 2300, m: "야자 2타임" }
         ];
-        const PROJECT_DATA = [
-            { loc: "본관3층", name: "301호" }, { loc: "", name: "302호" }, { loc: "", name: "303호" }, { loc: "", name: "304호" }, { loc: "", name: "305호" }, { loc: "", name: "306호" }, { loc: "", name: "307호" },
-            { loc: "본관2층", name: "201호" }, { loc: "", name: "202호" }, { loc: "", name: "203호" }, { loc: "", name: "회계실무실" }, { loc: "", name: "광고콘텐츠실" },
-            { loc: "본관1층", name: "비즈쿨실" }, { loc: "", name: "보건실" },
-            { loc: "신관1층", name: "세미나실" }, { loc: "", name: "IoT실" }, { loc: "", name: "시청각실" }, { loc: "", name: "휴머노이드실" }, { loc: "", name: "IT프로젝트실" },
-            { loc: "신관2층", name: "멀티미디어실" }, { loc: "", name: "크리에이티브 스튜디오실" }, { loc: "", name: "음악실" },
-            { loc: "신관3층", name: "3D실" }, { loc: "", name: "빅데이터실" },
-            { loc: "신관4층", name: "대강당" },
-            { loc: "기숙사", name: "학봉관/우정학사" }, { loc: "", name: "미술실" }
-        ];
-        const ADMIN_PW = "1224";
-        let bypassUntil = 0;
-        let isSnowActive = true;
+        for (const r of ranges) if (time >= r.s && time <= r.e) return { restricted: true, msg: r.m };
+    } else if (day === 0) { // 일요일
+        const sunRanges = [{ s: 1955, e: 2100, m: "일요 자습 1타임" }, { s: 2119, e: 2230, m: "일요 자습 2타임" }];
+        for (const r of sunRanges) if (time >= r.s && time <= r.e) return { restricted: true, msg: r.m };
+    }
+    return { restricted: false };
+}
 
-        // -----------------------------------------------------------
-        // 1. 시간표 & 급식 API (정렬 최적화)
-        // -----------------------------------------------------------
-        async function fetchMeal() {
-            const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-            try {
-                const res = await fetch(`https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${MEAL_KEY}&Type=json&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530560&MLSV_YMD=${date}`);
-                const data = await res.json();
-                document.getElementById('mealContainer').innerHTML = data.mealServiceDietInfo ? data.mealServiceDietInfo[1].row[0].DDISH_NM.replace(/<br\/>/g, '<br>') : "오늘은 급식 정보가 없습니다.";
-            } catch (e) { document.getElementById('mealContainer').innerHTML = "로드 실패"; }
+// 실시간 감시 (자동 정지)
+setInterval(() => {
+    const bypass = localStorage.getItem('music_bypass_until');
+    if (isPlaying && (!bypass || Date.now() > parseInt(bypass))) {
+        const check = checkTimeRestriction();
+        if (check.restricted) {
+            document.getElementById('bgm-audio').pause();
+            document.getElementById('mini-cover').classList.remove('playing');
+            document.getElementById('play-icon').className = 'fas fa-play';
+            isPlaying = false;
+            showRestrictionPopup(check.msg, 5000);
         }
+    }
+}, 1000);
 
-        async function fetchTimetable() {
-            const container = document.getElementById('timetableContainer');
-            const grade = document.getElementById('gradeSelector').value;
-            const classNum = document.getElementById('classSelector').value;
-            const monday = new Date(); monday.setDate(monday.getDate() - (monday.getDay() || 7) + 1);
-            const daysArr = []; for(let i=0; i<5; i++) { let d = new Date(monday); d.setDate(monday.getDate()+i); daysArr.push(d.getFullYear() + ('0'+(d.getMonth()+1)).slice(-2) + ('0'+d.getDate()).slice(-2)); }
-            try {
-                const requests = daysArr.map(d => fetch(`https://open.neis.go.kr/hub/hisTimetable?KEY=${TIME_KEY}&Type=json&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530560&GRADE=${grade}&CLASS_NM=${classNum}&ALL_TI_YMD=${d}`).then(r => r.json()));
-                const results = await Promise.all(requests);
-                const tableData = results.map(r => r.hisTimetable ? r.hisTimetable[1].row : []);
-                
-                let html = '<table class="timetable-table"><thead><tr><th style="width:15%">교시</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th></tr></thead><tbody>';
-                for(let p=1; p<=7; p++) {
-                    html += `<tr><td style="font-weight:bold; color:#5ac4ff;">${p}</td>`;
-                    for(let i=0; i<5; i++) { 
-                        const subject = tableData[i].find(x=>x.PERIO==p)?.ITRT_CNTNT || '-';
-                        html += `<td>${subject}</td>`; 
-                    }
-                    html += '</tr>';
-                }
-                container.innerHTML = html + '</tbody></table>';
-            } catch(e) { container.innerHTML = "시간표 로드 실패"; }
+// ==========================================
+// [3] API 호출 (급식, 시간표, 날씨)
+// ==========================================
+async function fetchMeal() {
+    const d = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const container = document.getElementById('mealContainer');
+    container.innerHTML = '<p style="color:#5ac4ff;">급식을 불러오는 중입니다...</p>';
+    try {
+        const res = await fetch(`https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${MEAL_KEY}&Type=json&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530560&MLSV_YMD=${d}`);
+        const data = await res.json();
+        container.innerHTML = data.mealServiceDietInfo ? data.mealServiceDietInfo[1].row[0].DDISH_NM.replace(/<br\/>/g, '<br>') : "오늘은 급식 정보가 없습니다.";
+    } catch (e) { container.innerHTML = "급식 로드 실패"; }
+}
+
+async function fetchTimetable() {
+    const container = document.getElementById('timetableContainer');
+    const grade = document.getElementById('gradeSelector').value;
+    const classNum = document.getElementById('classSelector').value;
+    container.innerHTML = '<p style="color:#5ac4ff;">시간표를 불러오는 중...</p>';
+    const monday = new Date(); monday.setDate(monday.getDate() - (monday.getDay() || 7) + 1);
+    const daysArr = []; for(let i=0; i<5; i++) { let d = new Date(monday); d.setDate(monday.getDate()+i); daysArr.push(d.getFullYear() + ('0'+(d.getMonth()+1)).slice(-2) + ('0'+d.getDate()).slice(-2)); }
+    try {
+        const requests = daysArr.map(d => fetch(`https://open.neis.go.kr/hub/hisTimetable?KEY=${TIME_KEY}&Type=json&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530560&GRADE=${grade}&CLASS_NM=${classNum}&ALL_TI_YMD=${d}`).then(r => r.json()));
+        const results = await Promise.all(requests);
+        const tableData = results.map(r => r.hisTimetable ? r.hisTimetable[1].row : []);
+        let html = '<table class="timetable-table"><thead><tr><th style="width:15%">교시</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th></tr></thead><tbody>';
+        for(let p=1; p<=7; p++) {
+            html += `<tr><td style="font-weight:bold; color:#5ac4ff;">${p}</td>`;
+            for(let i=0; i<5; i++) html += `<td>${tableData[i].find(x=>x.PERIO==p)?.ITRT_CNTNT || '-'}</td>`;
+            html += '</tr>';
         }
+        container.innerHTML = html + '</tbody></table>';
+    } catch(e) { container.innerHTML = "시간표 로드 실패"; }
+}
 
-        function openModal(id) {
-            document.getElementById(id).style.display = 'flex';
-            if (id === 'timetableModal') {
-                const gs = document.getElementById('gradeSelector'); const cs = document.getElementById('classSelector');
-                if(gs.options.length === 0) {
-                    for(let i=1; i<=3; i++) gs.add(new Option(i+'학년', i));
-                    for(let i=1; i<=6; i++) cs.add(new Option(i+'반', i));
-                    gs.value = localStorage.getItem('last_grade') || '1'; cs.value = localStorage.getItem('last_class') || '2';
-                    gs.onchange = fetchTimetable; cs.onchange = fetchTimetable;
-                }
-                fetchTimetable();
-            } else if (id === 'mealModal') fetchMeal();
+// ==========================================
+// [4] 메인 UI 렌더링 및 모달 제어
+// ==========================================
+function renderFeatures() {
+    const aside = document.querySelector('aside');
+    if (!aside || document.getElementById('advanced-features-container')) return;
+    
+    const ori = aside.querySelector('.notice'); if (ori) ori.style.display = 'none';
+    const div = document.createElement('div');
+    div.id = 'advanced-features-container';
+    div.innerHTML = `
+        <div class="feature-header" onclick="handleFeatureHeaderClick(this)">
+            <span>더보기</span><i class="fas fa-chevron-right"></i>
+        </div>
+        <div class="feature-list">
+            <div id="weather-display" class="weather-box">안산 <span style="font-weight:800;color:#fff">2.5°C</span> 맑음</div>
+            <div class="feature-btn" style="justify-content:space-between; cursor:default">
+                <span>❄️ 눈 내리기</span>
+                <label class="switch"><input type="checkbox" checked onchange="toggleSnow(this.checked)"><span class="slider"></span></label>
+            </div>
+            <button class="feature-btn" onclick="openModal('timetableModal')"><i class="fas fa-calendar-alt" style="color:#4ade80"></i> 시간표</button>
+            <button class="feature-btn" onclick="openModal('mealModal')"><i class="fas fa-utensils" style="color:#fb923c"></i> 급식</button>
+            <button class="feature-btn" onclick="openGallery()"><i class="fas fa-images" style="color:#ff6b6b"></i> 갤러리</button>
+            <button class="feature-btn" onclick="toggleInlineBgm()"><i class="fas fa-music" style="color:#c084fc"></i> BGM</button>
+            <div id="inline-bgm-container"></div>
+        </div>`;
+    const stats = aside.querySelector('div');
+    stats ? aside.insertBefore(div, stats.nextSibling) : aside.appendChild(div);
+    renderBgmList();
+}
+setInterval(renderFeatures, 500);
+
+// 보조 함수들 (전역 배치)
+function handleFeatureHeaderClick(header) {
+    const list = header.nextElementSibling;
+    const icon = header.querySelector('i');
+    list.classList.toggle('active');
+    icon.className = list.classList.contains('active') ? 'fas fa-chevron-down' : 'fas fa-chevron-right';
+}
+
+function openModal(id) {
+    document.getElementById(id).style.display = 'flex';
+    if (id === 'timetableModal') {
+        const gs = document.getElementById('gradeSelector');
+        const cs = document.getElementById('classSelector');
+        if (gs.options.length === 0) {
+            for (let i = 1; i <= 3; i++) gs.add(new Option(i + '학년', i));
+            for (let i = 1; i <= 6; i++) cs.add(new Option(i + '반', i));
+            gs.value = localStorage.getItem('last_grade') || '1';
+            cs.value = localStorage.getItem('last_class') || '2';
+            gs.onchange = fetchTimetable; cs.onchange = fetchTimetable;
         }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        fetchTimetable();
+    } else if (id === 'mealModal') fetchMeal();
+}
 
-        // -----------------------------------------------------------
-        // 2. BGM 및 재생 로직 (버그 수정 버전)
-        // -----------------------------------------------------------
-        const audio = document.getElementById('bgm-audio');
-        let currentBgmData = null, isPlaying = false;
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        function checkTime() {
-            if (Date.now() < bypassUntil) return { restricted: false };
-            const now = new Date(); const t = now.getHours() * 100 + now.getMinutes();
-            const ranges = [{ s: 845, e: 1240, m: "오전 수업" }, { s: 1346, e: 1630, m: "오후 수업" }, { s: 1709, e: 1830, m: "자습 시간" }, { s: 1946, e: 2110, m: "야자 1타임" }, { s: 2129, e: 2300, m: "야자 2타임" }];
-            for (const r of ranges) if (t >= r.s && t <= r.e) return { restricted: true, msg: r.m };
-            return { restricted: false };
+// 갤러리 열기 및 렌더링
+function openGallery() {
+    const container = document.getElementById('galleryContainer');
+    if (!container) return;
+    
+    container.innerHTML = ''; // 초기화
+
+    GALLERY_DATA.forEach(photo => {
+        const frame = document.createElement('div');
+        frame.className = 'photo-frame';
+        const rotate = (Math.random() * 10 - 5).toFixed(1);
+        frame.style.transform = `rotate(${rotate}deg)`;
+        
+        frame.innerHTML = `
+            <img src="${photo.url}" alt="photo" onerror="this.src='https://via.placeholder.com/150?text=No+Image'">
+            <div class="photo-caption">${photo.caption}</div>
+            <div class="gallery-btn-box">
+                <button class="gallery-action-btn" onclick="viewLargePhoto('${photo.url}')">사진보기</button>
+                <button class="gallery-action-btn" onclick="setDashboardBackground('${photo.url}')">배경설정</button>
+            </div>
+        `;
+        container.appendChild(frame);
+    });
+    
+    document.getElementById('galleryModal').style.display = 'flex';
+}
+
+// 사진 크게보기 기능
+function viewLargePhoto(url) {
+    const modal = document.getElementById('largePhotoModal');
+    const img = document.getElementById('largePhotoImg');
+    img.src = url;
+    modal.style.display = 'flex';
+}
+
+// 배경화면 설정 기능
+function setDashboardBackground(url) {
+    document.body.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('${url}')`;
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundPosition = 'center';
+    document.body.style.backgroundAttachment = 'fixed';
+    
+    alert("배경화면이 변경되었습니다");
+}
+
+// ==========================================
+// [5] BGM 및 기타 제어
+// ==========================================
+function renderBgmList() {
+    const bgmBox = document.getElementById('inline-bgm-container');
+    if (!bgmBox || bgmBox.children.length > 0) return;
+    BGM_LIST.forEach(bgm => {
+        const item = document.createElement('div');
+        item.className = 'inline-bgm-item';
+        item.innerHTML = `<img src="${bgm.cover}" class="inline-bgm-cover"><span class="inline-bgm-title">${bgm.title}</span>`;
+        item.onclick = (e) => { e.stopPropagation(); tryPlayMusic(bgm); };
+        bgmBox.appendChild(item);
+    });
+}
+
+function toggleInlineBgm() { document.getElementById('inline-bgm-container').classList.toggle('active'); }
+
+function tryPlayMusic(bgm) {
+    const check = checkTimeRestriction();
+    if (check.restricted) return showRestrictionPopup(check.msg, 13000);
+    const audio = document.getElementById('bgm-audio');
+    currentBgmData = bgm; audio.src = bgm.src; audio.play(); isPlaying = true;
+    updatePlayerUI();
+}
+
+function handlePlayBtn(e) {
+    e.stopPropagation(); if (!currentBgmData) return;
+    const check = checkTimeRestriction();
+    if (!isPlaying && check.restricted) return showRestrictionPopup(check.msg, 13000);
+    const audio = document.getElementById('bgm-audio');
+    if (isPlaying) { audio.pause(); document.getElementById('mini-cover').classList.remove('playing'); document.getElementById('play-icon').className = 'fas fa-play'; }
+    else { audio.play(); document.getElementById('mini-cover').classList.add('playing'); document.getElementById('play-icon').className = 'fas fa-pause'; }
+    isPlaying = !isPlaying;
+}
+
+function updatePlayerUI() {
+    document.getElementById('mini-player').classList.add('active');
+    document.getElementById('mini-cover').style.backgroundImage = `url('${currentBgmData.cover}')`;
+    document.getElementById('mini-cover').classList.add('playing');
+    document.getElementById('mini-title').innerText = currentBgmData.title;
+    document.getElementById('play-icon').className = 'fas fa-pause';
+}
+
+function stopMusic(e) { e.stopPropagation(); document.getElementById('bgm-audio').pause(); document.getElementById('mini-player').classList.remove('active', 'expanded'); isPlaying = false; }
+function toggleExpand(e) { if (!e.target.closest('.ctrl-btn')) document.getElementById('mini-player').classList.toggle('expanded'); }
+
+function showRestrictionPopup(msg, dur) {
+    const p = document.getElementById('restriction-popup');
+    document.getElementById('restrict-title').innerText = "🚫 재생 불가 시간";
+    document.getElementById('restriction-msg').innerText = `${msg}입니다.`;
+    p.style.display = 'flex'; p.style.background = "#ef4444";
+    clearTimeout(popupTimer);
+    popupTimer = setTimeout(() => { p.style.display = 'none'; }, dur);
+}
+
+// 패스워드 입력
+window.onload = () => {
+    document.getElementById('admin-pw').oninput = function() {
+        if (this.value === ADMIN_PW) {
+            localStorage.setItem('music_bypass_until', Date.now() + 86400000);
+            this.value = ""; document.getElementById('restriction-popup').style.background = "#22c55e";
+            document.getElementById('restrict-title').innerText = "✅ 승인 완료";
+            document.getElementById('restriction-msg').innerText = "제한이 해제되었습니다! (24시간)";
+            setTimeout(() => { document.getElementById('restriction-popup').style.display = 'none'; }, 2000);
         }
+    };
+};
 
-        function tryPlayMusic(bgm) {
-            const check = checkTime(); if (check.restricted) return showRestriction(check.msg);
-            currentBgmData = bgm; audio.src = bgm.src; audio.play(); isPlaying = true; updatePlayerUI();
-        }
+// -----------------------------------------------------------
+// 6. 기타 사유 & 눈 효과 (원본 로직 유지)
+// -----------------------------------------------------------
+window.openEtcModal = function(name, lane, callback) {
+    const overlay = document.getElementById('custom-modal-overlay');
+    const input = document.getElementById('custom-reason-input');
+    const tableBody = document.getElementById('project-table-body');
+    const recentList = document.getElementById('recent-reasons-list');
+    const recentContainer = document.getElementById('recent-reasons-container');
 
-        function handlePlayBtn(e) {
-            e.stopPropagation(); if (!currentBgmData) return alert("노래를 먼저 선택하세요!");
-            const check = checkTime(); if (!isPlaying && check.restricted) return showRestriction(check.msg);
-            if(isPlaying) { audio.pause(); document.getElementById('mini-cover').classList.remove('playing'); document.getElementById('play-icon').className='fas fa-play'; }
-            else { audio.play(); document.getElementById('mini-cover').classList.add('playing'); document.getElementById('play-icon').className='fas fa-pause'; }
-            isPlaying = !isPlaying;
-        }
+    // 1. 초기화 및 열기
+    overlay.style.display = 'flex';
+    input.value = '';
+    input.focus();
 
-        function updatePlayerUI() {
-            document.getElementById('mini-player').classList.add('active');
-            document.getElementById('mini-cover').style.backgroundImage = `url('${currentBgmData.cover}')`;
-            document.getElementById('mini-cover').classList.add('playing');
-            document.getElementById('mini-title').innerText = currentBgmData.title;
-            document.getElementById('play-icon').className = 'fas fa-pause';
-        }
-
-        function stopMusic(e) { e.stopPropagation(); audio.pause(); document.getElementById('mini-player').classList.remove('active', 'expanded'); isPlaying = false; }
-        function toggleExpand(e) { if (!e.target.closest('.ctrl-btn')) document.getElementById('mini-player').classList.toggle('expanded'); }
-        function showRestriction(msg) { const p = document.getElementById('restriction-popup'); document.getElementById('restriction-msg').innerText = `${msg} 시간입니다.`; p.style.display = 'flex'; setTimeout(() => { p.style.display = 'none'; }, 5000); }
-        document.getElementById('admin-pw').oninput = function() { if (this.value === ADMIN_PW) { bypassUntil = Date.now() + 300000; this.value = ""; document.getElementById('restriction-popup').style.background = "#22c55e"; setTimeout(() => { document.getElementById('restriction-popup').style.display = 'none'; document.getElementById('restriction-popup').style.background = "#ef4444"; }, 1000); } };
-
-        // -----------------------------------------------------------
-        // 3. 더보기 사이드바
-        // -----------------------------------------------------------
-        function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=document.getElementById('snow-canvas'); const ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height); } }
-        function renderFeatures() {
-            const aside = document.querySelector('aside'); if(!aside) return;
-            aside.querySelector('.notice') && (aside.querySelector('.notice').style.display = 'none');
-            if(!document.getElementById('advanced-features-container')) {
-                const div = document.createElement('div'); div.id = 'advanced-features-container';
-                div.innerHTML = `<div class="feature-header" onclick="this.nextElementSibling.classList.toggle('active'); this.querySelector('i').classList.toggle('fa-chevron-right'); this.querySelector('i').classList.toggle('fa-chevron-down');"><span>더보기</span><i class="fas fa-chevron-right"></i></div>
-                    <div class="feature-list"><div class="weather-box"><i class="fas fa-cloud-sun" style="color:#5ac4ff"></i> 안산 <span style="font-weight:800;color:#fff">-</span>-</div>
-                        <div class="feature-btn" style="justify-content:space-between; cursor:default"><span>❄️ 눈 내리기</span><label class="switch"><input type="checkbox" checked onchange="toggleSnow(this.checked)"><span class="slider"></span></label></div>
-                        <button class="feature-btn" onclick="openModal('timetableModal')"><i class="fas fa-calendar-alt" style="color:#4ade80"></i> 시간표</button>
-                        <button class="feature-btn" onclick="openModal('mealModal')"><i class="fas fa-utensils" style="color:#fb923c"></i> 급식</button>
-                        <button class="feature-btn" onclick="document.getElementById('inline-bgm-container').classList.toggle('active')"><i class="fas fa-music"></i> BGM</button>
-                        <div id="inline-bgm-container"></div></div>`;
-                const stats = aside.querySelector('div'); stats ? aside.insertBefore(div, stats.nextSibling) : aside.appendChild(div);
-                const bgmBox = document.getElementById('inline-bgm-container');
-                BGM_LIST.forEach(bgm => {
-                    const item = document.createElement('div'); item.className = 'inline-bgm-item';
-                    item.innerHTML = `<img src="${bgm.cover}" class="inline-bgm-cover"><span class="inline-bgm-title">${bgm.title}</span>`;
-                    item.onclick = (e) => { e.stopPropagation(); tryPlayMusic(bgm); }; bgmBox.appendChild(item);
-                });
-            }
-        }
-        setInterval(renderFeatures, 500);
-
-        // -----------------------------------------------------------
-        // 4. 기타 사유 팝업 (독립 레이아웃 및 사유 버튼 디자인)
-        // -----------------------------------------------------------
-        window.openEtcModal = function(name, lane, callback) {
-            const overlay = document.getElementById('custom-modal-overlay');
-            const input = document.getElementById('custom-reason-input');
-            const tableBody = document.getElementById('project-table-body');
-            const recentList = document.getElementById('recent-reasons-list');
-            const recentContainer = document.getElementById('recent-reasons-container');
-
-            overlay.style.display = 'flex'; input.value = ''; input.focus();
-            tableBody.innerHTML = '';
-            PROJECT_DATA.forEach(d => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td style="font-weight:bold; color:#aaa; padding:10px; border-bottom:1px solid #333;">${d.loc}</td><td style="border-bottom:1px solid #333;"><button class="table-select-btn">${d.name}</button></td>`;
-                tr.querySelector('button').onclick = () => { input.value = `${d.loc} ${d.name}`; input.focus(); };
-                tableBody.appendChild(tr);
-            });
-
-            const saved = JSON.parse(localStorage.getItem('my_recent_reasons') || '[]');
-            const all = [...saved, '지연귀교', '외출'];
-            recentList.innerHTML = '';
-            if(all.length > 0) {
-                recentContainer.style.display = 'block';
-                all.forEach(txt => {
-                    const btn = document.createElement('button'); btn.className = 'recent-reason-btn'; btn.innerText = txt;
-                    btn.onclick = () => { input.value = txt; input.focus(); }; recentList.appendChild(btn);
-                });
-            }
-
-            document.getElementById('modal-btn-save').onclick = () => { 
-                const val = input.value.trim();
-                if(val) {
-                    let list = JSON.parse(localStorage.getItem('my_recent_reasons') || '[]');
-                    if(!list.includes(val) && !['지연귀교','외출'].includes(val)) { list.unshift(val); if(list.length > 5) list.pop(); localStorage.setItem('my_recent_reasons', JSON.stringify(list)); }
-                }
-                overlay.style.display='none'; callback(val); 
-            };
-            document.getElementById('modal-btn-cancel').onclick = () => overlay.style.display='none';
+    // 2. 오른쪽 프로젝트실 목록 생성
+    tableBody.innerHTML = '';
+    PROJECT_DATA.forEach(d => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="font-weight:bold; color:#aaa;">${d.loc}</td>
+            <td><button class="table-select-btn">${d.name}</button></td>
+        `;
+        tr.querySelector('button').onclick = () => {
+            input.value = (d.loc ? d.loc + " " : "") + d.name;
+            input.focus();
         };
+        tableBody.appendChild(tr);
+    });
 
-        // -----------------------------------------------------------
-        // 5. 눈 효과
-        // -----------------------------------------------------------
-        (function() {
-            const canvas = document.getElementById('snow-canvas'); const ctx = canvas.getContext('2d');
-            let w = window.innerWidth, h = window.innerHeight; canvas.width = w; canvas.height = h;
-            const flakes = []; let acc = 0;
-            for(let i=0; i<100; i++) flakes.push({x:Math.random()*w, y:Math.random()*-h, r:Math.random()*2+1, s:Math.random()+0.5, o:Math.random()*0.5+0.3});
-            function draw() {
-                if(!isSnowActive) { requestAnimationFrame(draw); return; }
-                ctx.clearRect(0,0,w,h);
-                if(acc>0){ const g=ctx.createLinearGradient(0,h,0,h-acc); g.addColorStop(0,'rgba(255,255,255,0.4)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(0,h-acc,w,acc); }
-                ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.beginPath();
-                flakes.forEach(f=>{ ctx.globalAlpha=f.o; ctx.moveTo(f.x,f.y); ctx.arc(f.x,f.y,f.r,0,Math.PI*2); f.y+=f.s; if(f.y>h){ if(acc<30 && Math.random()>0.99) acc+=0.05; f.y=-5; f.x=Math.random()*w; } });
-                ctx.fill(); requestAnimationFrame(draw);
+    // 3. 왼쪽 최근 사유 목록 생성
+    const saved = JSON.parse(localStorage.getItem('my_recent_reasons') || '[]');
+    const fixed = ['지연귀교', '외출'];
+    const allReasons = [...new Set([...saved, ...fixed])]; // 중복 제거
+
+    recentList.innerHTML = '';
+    if (allReasons.length > 0) {
+        recentContainer.style.display = 'block';
+        allReasons.forEach(txt => {
+            const btn = document.createElement('button');
+            btn.className = 'recent-reason-btn';
+            btn.innerText = txt;
+            btn.onclick = () => { input.value = txt; input.focus(); };
+            recentList.appendChild(btn);
+        });
+    }
+
+    // 4. 저장 버튼 이벤트
+    document.getElementById('modal-btn-save').onclick = () => {
+        const val = input.value.trim();
+        if (val) {
+            // 최근 사유 저장 로직
+            let list = JSON.parse(localStorage.getItem('my_recent_reasons') || '[]');
+            if (!list.includes(val) && !fixed.includes(val)) {
+                list.unshift(val);
+                if (list.length > 5) list.pop();
+                localStorage.setItem('my_recent_reasons', JSON.stringify(list));
             }
-            window.onresize = () => { w=window.innerWidth; h=window.innerHeight; canvas.width=w; canvas.height=h; }; draw();
-        })();
+            overlay.style.display = 'none';
+            callback(val);
+        } else {
+            alert("사유를 입력해주세요!");
+        }
+    };
+
+    // 5. 취소 버튼 이벤트
+    document.getElementById('modal-btn-cancel').onclick = () => {
+        overlay.style.display = 'none';
+    };
+};
+
+function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=document.getElementById('snow-canvas'); c.getContext('2d').clearRect(0,0,c.width,c.height); } }
+(function() {
+    const canvas = document.getElementById('snow-canvas'); const ctx = canvas.getContext('2d');
+    let w = window.innerWidth, h = window.innerHeight; canvas.width = w; canvas.height = h;
+    const flakes = []; let acc = 0;
+    for(let i=0; i<100; i++) flakes.push({x:Math.random()*w, y:Math.random()*-h, r:Math.random()*2+1, s:Math.random()+0.5, o:Math.random()*0.5+0.3});
+    function draw() {
+        if(!isSnowActive) { requestAnimationFrame(draw); return; }
+        ctx.clearRect(0,0,w,h);
+        if(acc>0){ const g=ctx.createLinearGradient(0,h,0,h-acc); g.addColorStop(0,'rgba(255,255,255,0.4)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(0,h-acc,w,acc); }
+        ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.beginPath();
+        flakes.forEach(f=>{ ctx.globalAlpha=f.o; ctx.moveTo(f.x,f.y); ctx.arc(f.x,f.y,f.r,0,Math.PI*2); f.y+=f.s; if(f.y>h){ if(acc<30 && Math.random()>0.99) acc+=0.05; f.y=-5; f.x=Math.random()*w; } });
+        ctx.fill(); requestAnimationFrame(draw);
+    }
+    window.onresize = () => { w=window.innerWidth; h=window.innerHeight; canvas.width=w; canvas.height=h; }; draw();
+})();
     </script>
+    <div id="galleryModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 25000; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
+        <div class="modal-window" style="background: #2a2d35; border: 1px solid #444; border-radius: 16px; padding: 30px; width: 90%; max-width: 900px; height: 80vh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
+            <h2 style="color:white; margin:0 0 20px 0; text-align:center;">갤러리</h2>
+            <div id="galleryContainer" class="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 40px; padding: 20px; overflow-y: auto; flex-grow: 1; background: rgba(0,0,0,0.2); border-radius: 10px;">
+                </div>
+            <button onclick="document.getElementById('galleryModal').style.display='none'" 
+                    style="margin-top:20px; background:#444; color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:700;">
+                닫기
+            </button>
+        </div>
+    </div>
+
+    <div id="largePhotoModal" onclick="this.style.display='none'">
+      <img id="largePhotoImg" src="" alt="Large View">
+    </div>
   </body>
 </html>
