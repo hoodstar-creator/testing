@@ -363,6 +363,53 @@ let currentBgmData = null;
 let popupTimer = null;
 let isSnowActive = true;
 
+let lastSnowAutoOffRange = null; // 마지막으로 눈을 자동으로 끈 시간대 기록
+// 특정 시간대 진입 시 눈을 자동으로 끄는 로직
+function checkSnowAutoOff() {
+    const now = new Date();
+    const time = now.getHours() * 100 + now.getMinutes(); // 예: 17:09 -> 1709
+    
+    // 요청하신 자동 꺼짐 시간대 설정
+    const snowOffRanges = [
+        { s: 1709, e: 1835, id: 'afterschool' }, // 5:09분 ~ 6:35분
+        { s: 1945, e: 2110, id: 'night1' },      // 7:45분 ~ 9:10분
+        { s: 2125, e: 2300, id: 'night2' }       // 9:25분 ~ 11:00분
+    ];
+
+    let currentRangeId = null;
+    for (const r of snowOffRanges) {
+        if (time >= r.s && time <= r.e) {
+            currentRangeId = r.id;
+            break;
+        }
+    }
+
+    // 해당 시간대에 진입했고, 아직 이 시간대에서 자동 Off를 실행한 적이 없다면
+    if (currentRangeId && lastSnowAutoOffRange !== currentRangeId) {
+        if (isSnowActive) {
+            // 눈이 켜져있을 때만 작동
+            isSnowActive = false;
+            
+            // 1. 실제 눈 내림 캔버스 멈춤
+            const c = document.getElementById('snow-canvas');
+            if (c) c.getContext('2d').clearRect(0, 0, c.width, c.height);
+
+            // 2. 사이드바의 토글 스위치 UI도 Off 상태로 변경
+            const snowToggle = document.getElementById('snow-toggle');
+            if (snowToggle) snowToggle.checked = false;
+
+            console.log(`[시스템] ${currentRangeId} 시간대가 되어 눈 내림을 자동으로 종료합니다.`);
+        }
+        // 이 시간대에서 이미 실행했음을 기록 (수동으로 다시 켜는 것을 방해하지 않음)
+        lastSnowAutoOffRange = currentRangeId;
+    }
+
+    // 모든 시간대 밖으로 나가면 기록 초기화 (다음 시간대 진입을 위해)
+    if (!currentRangeId) {
+        lastSnowAutoOffRange = null;
+    }
+}
+
 // ==========================================
 // [2] 시간 제한 및 우회 로직
 // ==========================================
@@ -389,6 +436,7 @@ function checkTimeRestriction() {
 
 // 실시간 감시 (자동 정지)
 setInterval(() => {
+    checkSnowAutoOff();
     const bypass = localStorage.getItem('music_bypass_until');
     if (isPlaying && (!bypass || Date.now() > parseInt(bypass))) {
         const check = checkTimeRestriction();
