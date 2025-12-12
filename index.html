@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-      /* [1. 기본 효과 및 눈] */
+      /* [1. 기본 설정 및 효과] */
       #snow-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9998; pointer-events: none; }
       .form, .notice, .aside-announcement, ul.notice-ul { display: none !important; }
 
@@ -23,12 +23,11 @@
       .feature-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; padding: 5px; color: #ffffff; font-weight: 700; user-select: none; }
       .feature-list { display: none; flex-direction: column; gap: 8px; margin-top: 12px; }
       .feature-list.active { display: flex; }
-      
       .weather-box { background: rgba(255, 255, 255, 0.05); padding: 8px; border-radius: 8px; display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 5px; font-size: 0.8rem; color: #ddd; border: 1px solid #444; }
       .feature-btn { background: #2a2d35; border: 1px solid #444; color: #ffffff; padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; position: relative; }
       .feature-btn:hover { background: #333; border-color: #666; }
 
-      /* 토글 스위치 */
+      /* 토글 스위치(눈 내리기 레버) */
       .switch { position: relative; display: inline-block; width: 34px; height: 18px; margin-left: auto; }
       .switch input { opacity: 0; width: 0; height: 0; }
       .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .4s; border-radius: 20px; }
@@ -36,76 +35,67 @@
       input:checked + .slider { background-color: #2563eb; }
       input:checked + .slider:before { transform: translateX(16px); }
 
-      /* BGM 리스트 */
-      #inline-bgm-container { display: none; margin-top: 5px; background: #15171c; border-radius: 8px; border: 1px solid #444; overflow: hidden; max-height: 180px; overflow-y: auto; }
-      #inline-bgm-container.active { display: block; }
-      .inline-bgm-item { display: flex; align-items: center; gap: 10px; padding: 8px; border-bottom: 1px solid #222; cursor: pointer; }
-      .inline-bgm-item:hover { background: #252830; }
-      .inline-bgm-cover { width: 30px; height: 30px; border-radius: 4px; object-fit: cover; }
-      .inline-bgm-title { font-size: 0.75rem; font-weight: bold; color: #fff; }
-
-      /* [3. 미니 플레이어 - 크기 키움 및 안정화] */
+      /* [3. 미니 플레이어 - 확장 기능 추가] */
       #mini-player {
           position: fixed; bottom: 30px; left: 30px; z-index: 10000;
           display: flex; align-items: center; gap: 15px;
-          background: rgba(15, 17, 21, 0.9); padding: 12px 20px 12px 12px;
+          background: rgba(15, 17, 21, 0.95); padding: 10px;
           border-radius: 60px; border: 1px solid #444;
           box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(10px);
-          transition: all 0.3s; width: auto; min-width: 200px;
-          transform: translateY(150%);
+          transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          width: auto; min-width: 210px; max-width: 240px; cursor: pointer; transform: translateY(150%);
       }
       #mini-player.active { transform: translateY(0); }
       
+      /* 클릭 시 확장 스타일 */
+      #mini-player.expanded {
+          border-radius: 24px; padding: 25px 20px;
+          flex-direction: column; max-width: 210px; /* 가로를 좁게 유지 */
+          bottom: 40px; left: 40px;
+      }
+
       .vinyl-record {
-          width: 55px; height: 55px; border-radius: 50%;
+          width: 50px; height: 50px; border-radius: 50%;
           background-size: cover; background-position: center;
           border: 3px solid #222; animation: spin 4s linear infinite;
-          animation-play-state: paused; box-shadow: 0 0 15px rgba(0,0,0,0.5);
+          animation-play-state: paused; transition: all 0.4s;
+          box-shadow: 0 0 15px rgba(0,0,0,0.5);
       }
+      #mini-player.expanded .vinyl-record { width: 130px; height: 130px; margin-bottom: 15px; }
       .vinyl-record.playing { animation-play-state: running; }
-      @keyframes spin { 100% { transform: rotate(360deg); } }
       
-      .player-info { color: white; display: flex; flex-direction: column; gap: 5px; }
-      .player-title { font-size: 0.9rem; font-weight: bold; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .player-ctrl-box { display: flex; gap: 18px; align-items: center; }
-      .ctrl-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 1.2rem; transition: 0.2s; padding: 0; }
-      .ctrl-btn:hover { color: #5ac4ff; transform: scale(1.1); }
+      .player-info { color: white; display: flex; flex-direction: column; transition: all 0.4s; }
+      #mini-player.expanded .player-info { text-align: center; align-items: center; }
+      .player-title { font-size: 0.85rem; font-weight: bold; max-width: 130px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      #mini-player.expanded .player-title { font-size: 1.1rem; max-width: 170px; white-space: normal; margin-bottom: 15px; }
 
-      /* [4. 모달 시스템 - 시간표/급식 고정] */
+      .player-ctrl-box { display: flex; gap: 20px; align-items: center; }
+      .ctrl-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 1.2rem; transition: 0.2s; }
+      .ctrl-btn:hover { color: #5ac4ff; }
+
+      @keyframes spin { 100% { transform: rotate(360deg); } }
+
+      /* [4. 모달 시스템 - 시간표/급식] */
       .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 20000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
-      .modal-window { background: #1e2025; border: 1px solid #333; border-radius: 16px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); display: flex; flex-direction: column; max-width: 600px; width: 90%; animation: fadeIn 0.3s ease; }
+      .modal-window { background: #1e2025; border: 1px solid #333; border-radius: 16px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); display: flex; flex-direction: column; max-width: 600px; width: 90%; }
       .timetable-table { width: 100%; border-collapse: collapse; margin-top: 15px; color: #eee; text-align: center; }
       .timetable-table th { background: #2a2d35; padding: 10px; border: 1px solid #444; color: #5ac4ff; }
       .timetable-table td { padding: 10px; border: 1px solid #333; background: #15171c; }
 
-      /* [5. 기타 사유 레이아웃 및 버튼 디자인] */
+      /* [5. 기타 사유 독립된 창 디자인] */
       .etc-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 15000; display: none; align-items: center; justify-content: center; gap: 40px; backdrop-filter: blur(5px); animation: fadeIn 0.2s ease; }
-      .window-reason, .window-project { background: #1e2025; border: 1px solid #333; border-radius: 12px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); display: flex; flex-direction: column; max-height: 85vh; }
-      .window-reason { width: 400px; }
-      .window-project { width: 350px; height: 500px; }
+      .window-reason, .window-project { background: #1e2025; border: 1px solid #333; border-radius: 12px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); display: flex; flex-direction: column; max-height: 80vh; }
+      .window-reason { width: 400px; } .window-project { width: 350px; height: 500px; }
       .window-title { color: #fff; margin: 0 0 15px 0; font-size: 1.3rem; font-weight: 700; border-bottom: 1px solid #333; padding-bottom: 15px; text-align: center; }
-      
-      /* 사유 입력창 */
       .modal-input { width: 100%; padding: 14px; border-radius: 8px; border: 1px solid #444; background: #2a2d35; color: white; font-size: 1.1rem; outline: none; box-sizing: border-box; }
       
-      /* ★사유 버튼 새로운 디자인★ */
       .chip-container { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
-      .recent-reason-btn { 
-          background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); 
-          color: #eee; padding: 8px 14px; border-radius: 10px; font-size: 0.85rem; 
-          cursor: pointer; transition: 0.2s; backdrop-filter: blur(5px);
-      }
-      .recent-reason-btn:hover { background: #2563eb; border-color: #3b82f6; color: white; }
-
-      .table-container { flex-grow: 1; overflow-y: auto; border: 1px solid #333; border-radius: 8px; background: #15171c; }
-      .project-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 0.9rem; color: #aaa; }
-      .project-table th { background: #252830; color: #ccc; padding: 12px; border-bottom: 1px solid #444; position: sticky; top: 0; }
-      .table-select-btn { background: #2563eb; color: white; border: none; padding: 6px 0; border-radius: 4px; cursor: pointer; width: 90%; transition: 0.2s; }
-      .table-select-btn:hover { background: #1d4ed8; }
+      .recent-reason-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: #eee; padding: 8px 14px; border-radius: 10px; font-size: 0.85rem; cursor: pointer; transition: 0.2s; backdrop-filter: blur(5px); }
+      .recent-reason-btn:hover { background: #2563eb; color: white; }
 
       /* [6. 차단 팝업] */
       #restriction-popup { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 30000; background: #ef4444; color: white; padding: 15px 25px; border-radius: 12px; display: none; box-shadow: 0 10px 40px rgba(239, 68, 68, 0.4); align-items: center; gap: 15px; animation: slideDown 0.4s ease; }
-      .admin-input { width: 55px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.3); color: white; font-size: 0.8rem; padding: 4px; border-radius: 4px; outline: none; text-align: center; }
+      .admin-input { width: 50px; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; font-size: 0.7rem; padding: 3px; border-radius: 4px; outline: none; text-align: center; }
 
       @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       @keyframes slideDown { from { top: -100px; } to { top: 20px; } }
@@ -118,20 +108,20 @@
     <div id="custom-modal-overlay" class="etc-overlay">
         <div class="window-reason">
             <h3 class="window-title">기타 이동 사유 입력</h3>
-            <p style="color:#fff; font-size:0.9rem; margin-bottom:10px; font-weight:600;">📝 사유 입력</p>
-            <input type="text" id="custom-reason-input" class="modal-input" placeholder="이동 사유를 입력하세요" autocomplete="off">
+            <p style="color:#fff; font-size:0.9rem; margin-bottom:10px;">📝 사유 직접 입력</p>
+            <input type="text" id="custom-reason-input" class="modal-input" placeholder="사유를 입력하세요" autocomplete="off">
             <div id="recent-reasons-container" style="display: none;">
-                <p style="color:#888; font-size:0.75rem; margin:20px 0 8px;">최근 사용 / 고정</p>
+                <p style="color:#888; font-size:0.75rem; margin:20px 0 8px;">최근 사유 / 고정</p>
                 <div id="recent-reasons-list" class="chip-container"></div>
             </div>
             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:auto; padding-top:20px;">
-                <button id="modal-btn-cancel" style="background:#333; color:#ccc; border:none; padding:12px 25px; border-radius:10px; cursor:pointer; font-weight:700;">취소</button>
-                <button id="modal-btn-save" style="background:#2563eb; color:white; border:none; padding:12px 25px; border-radius:10px; cursor:pointer; font-weight:700;">확인</button>
+                <button id="modal-btn-cancel" style="background:#333; color:#ccc; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">취소</button>
+                <button id="modal-btn-save" style="background:#2563eb; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer;">확인</button>
             </div>
         </div>
         <div class="window-project">
             <h3 class="window-title">프로젝트실 목록</h3>
-            <div class="table-container"><table class="project-table"><thead><tr><th width="35%">위치</th><th width="65%">명칭</th></tr></thead><tbody id="project-table-body"></tbody></table></div>
+            <div class="table-container"><table class="project-table" style="width:100%; border-collapse:collapse; text-align:center;"><thead><tr><th style="background:#252830; padding:10px; color:#ccc; border-bottom:1px solid #444;">위치</th><th style="background:#252830; padding:10px; color:#ccc; border-bottom:1px solid #444;">명칭</th></tr></thead><tbody id="project-table-body"></tbody></table></div>
         </div>
     </div>
 
@@ -150,7 +140,7 @@
     <div id="mealModal" class="modal-overlay">
         <div class="modal-window">
             <h2 style="color:white; margin:0 0 15px 0;"><i class="fas fa-utensils"></i> 오늘의 급식</h2>
-            <div id="mealContainer" style="line-height:2.0; color:#ddd; text-align:center; font-size:1.1rem; background:#15171c; padding:20px; border-radius:10px;">급식 로딩 중...</div>
+            <div id="mealContainer" style="line-height:2.0; color:#ddd; text-align:center; font-size:1.1rem; background:#15171c; padding:20px; border-radius:10px;">로딩 중...</div>
             <button onclick="closeModal('mealModal')" style="margin-top:20px; background:#333; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer;">닫기</button>
         </div>
     </div>
@@ -160,7 +150,7 @@
         <div style="flex:1"><b style="display:block">🚫 재생 불가 시간</b><small id="restriction-msg"></small></div>
     </div>
 
-    <div id="mini-player">
+    <div id="mini-player" onclick="toggleExpand(event)">
         <div id="mini-cover" class="vinyl-record"></div>
         <div class="player-info">
             <span id="mini-title" class="player-title">노래를 선택하세요</span>
@@ -173,7 +163,9 @@
     </div>
 
     <script>
-        // [설정 데이터]
+        // ==========================================
+        // [1] 설정 데이터
+        // ==========================================
         const MEAL_KEY = '819b209aef6e4bc6921421155d08c60f';
         const TIME_KEY = 'fb54814355634dc9b29c7bb7b7bd028c';
         const BGM_LIST = [
@@ -184,7 +176,7 @@
             { loc: "본관3층", name: "301호" }, { loc: "본관3층", name: "302호" }, { loc: "본관3층", name: "303호" }, { loc: "본관3층", name: "304호" }, { loc: "본관3층", name: "305호" }, { loc: "본관3층", name: "306호" }, { loc: "본관3층", name: "307호" },
             { loc: "본관2층", name: "201호" }, { loc: "본관2층", name: "202호" }, { loc: "본관2층", name: "203호" }, { loc: "본관2층", name: "회계실무실" }, { loc: "본관2층", name: "광고콘텐츠실" },
             { loc: "본관1층", name: "비즈쿨실" }, { loc: "본관1층", name: "보건실" },
-            { loc: "신관1층", name: "세미나실" }, { loc: "신관1층", name: "사물인터넷실" }, { loc: "신관1층", name: "시청각실" }, { loc: "신관1층", name: "휴머노이드실" }, { loc: "신관1층", name: "IT프로젝트실" },
+            { loc: "신관1층", name: "세미나실" }, { loc: "신관1층", name: "IoT실" }, { loc: "신관1층", name: "시청각실" }, { loc: "신관1층", name: "휴머노이드실" }, { loc: "신관1층", name: "IT프로젝트실" },
             { loc: "신관2층", name: "멀티미디어실" }, { loc: "신관2층", name: "크리에이터실" }, { loc: "신관2층", name: "음악실" },
             { loc: "신관3층", name: "3D실" }, { loc: "신관3층", name: "빅데이터실" },
             { loc: "기숙사", name: "학봉관/우정학사" }, { loc: "기숙사", name: "미술실" }
@@ -194,7 +186,7 @@
         let isSnowActive = true;
 
         // -----------------------------------------------------------
-        // 1. 시간표 & 급식 API 로직
+        // 2. 시간표 & 급식 API 로직
         // -----------------------------------------------------------
         async function fetchMeal() {
             const date = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -202,7 +194,7 @@
                 const res = await fetch(`https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${MEAL_KEY}&Type=json&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530560&MLSV_YMD=${date}`);
                 const data = await res.json();
                 document.getElementById('mealContainer').innerHTML = data.mealServiceDietInfo ? data.mealServiceDietInfo[1].row[0].DDISH_NM.replace(/<br\/>/g, '<br>') : "오늘은 급식이 없습니다.";
-            } catch (e) { document.getElementById('mealContainer').innerHTML = "급식 로드 실패"; }
+            } catch (e) { document.getElementById('mealContainer').innerHTML = "로드 실패"; }
         }
 
         async function fetchTimetable() {
@@ -223,7 +215,7 @@
                 }
                 container.innerHTML = html + '</tbody></table>';
                 localStorage.setItem('last_grade', grade); localStorage.setItem('last_class', classNum);
-            } catch(e) { container.innerHTML = "시간표 로드 실패"; }
+            } catch(e) { container.innerHTML = "로드 실패"; }
         }
 
         function openModal(id) {
@@ -242,7 +234,7 @@
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
         // -----------------------------------------------------------
-        // 2. BGM & 시간 제한 (이전 안정 버전 복구)
+        // 3. BGM 및 시간 제한 (안정적인 LP 방식)
         // -----------------------------------------------------------
         function checkTime() {
             if (Date.now() < bypassUntil) return { restricted: false };
@@ -263,15 +255,8 @@
         function handlePlayBtn(e) {
             e.stopPropagation(); if(!currentBgm) return;
             const check = checkTime(); if(!isPlaying && check.restricted) return showRestriction(check.msg);
-            if(isPlaying) {
-                audio.pause();
-                document.getElementById('mini-cover').classList.remove('playing');
-                document.getElementById('play-icon').className='fas fa-play';
-            } else {
-                audio.play();
-                document.getElementById('mini-cover').classList.add('playing');
-                document.getElementById('play-icon').className='fas fa-pause';
-            }
+            if(isPlaying) { audio.pause(); document.getElementById('mini-cover').classList.remove('playing'); document.getElementById('play-icon').className='fas fa-play'; }
+            else { audio.play(); document.getElementById('mini-cover').classList.add('playing'); document.getElementById('play-icon').className='fas fa-pause'; }
             isPlaying = !isPlaying;
         }
 
@@ -283,12 +268,13 @@
             document.getElementById('play-icon').className = 'fas fa-pause';
         }
 
-        function stopMusic(e) { e.stopPropagation(); audio.pause(); document.getElementById('mini-player').classList.remove('active'); isPlaying = false; }
+        function stopMusic(e) { e.stopPropagation(); audio.pause(); document.getElementById('mini-player').classList.remove('active', 'expanded'); isPlaying = false; }
+        function toggleExpand(e) { if (!e.target.closest('.ctrl-btn')) document.getElementById('mini-player').classList.toggle('expanded'); }
         function showRestriction(msg) { const p = document.getElementById('restriction-popup'); document.getElementById('restriction-msg').innerText = `${msg} 시간입니다.`; p.style.display = 'flex'; setTimeout(() => { p.style.display = 'none'; }, 5000); }
         document.getElementById('admin-pw').oninput = function() { if (this.value === ADMIN_PW) { bypassUntil = Date.now() + 300000; this.value = ""; document.getElementById('restriction-popup').style.background = "#22c55e"; setTimeout(() => { document.getElementById('restriction-popup').style.display = 'none'; document.getElementById('restriction-popup').style.background = "#ef4444"; }, 1000); } };
 
         // -----------------------------------------------------------
-        // 3. 더보기 사이드바 & 눈 제어
+        // 4. 사이드바 및 더보기
         // -----------------------------------------------------------
         function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=document.getElementById('snow-canvas'); const ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height); } }
         
@@ -297,8 +283,8 @@
             aside.querySelector('.notice') && (aside.querySelector('.notice').style.display = 'none');
             if(!document.getElementById('advanced-features-container')) {
                 const div = document.createElement('div'); div.id = 'advanced-features-container';
-                div.innerHTML = `<div class="feature-header" onclick="this.nextElementSibling.classList.toggle('active'); this.querySelector('i').classList.toggle('fa-chevron-right'); this.querySelector('i').classList.toggle('fa-chevron-down');"><span>✨ 더보기</span><i class="fas fa-chevron-right"></i></div>
-                    <div class="feature-list"><div id="weather-display" class="weather-box"><i class="fas fa-snowflake" style="color:#5ac4ff"></i> 안산 <span style="font-weight:800;color:#fff">2.5°C</span> 맑음</div>
+                div.innerHTML = `<div class="feature-header" onclick="this.nextElementSibling.classList.toggle('active'); this.querySelector('i').classList.toggle('fa-chevron-right'); this.querySelector('i').classList.toggle('fa-chevron-down');"><span>더보기</span><i class="fas fa-chevron-right"></i></div>
+                    <div class="feature-list"><div class="weather-box"><i class="fas fa-cloud-sun" style="color:#5ac4ff"></i> 안산 <span style="font-weight:800;color:#fff">2.5°C</span> 맑음</div>
                         <div class="feature-btn" style="justify-content:space-between; cursor:default"><span>❄️ 눈 내리기</span><label class="switch"><input type="checkbox" checked onchange="toggleSnow(this.checked)"><span class="slider"></span></label></div>
                         <button class="feature-btn" onclick="openModal('timetableModal')"><i class="fas fa-calendar-alt" style="color:#4ade80"></i> 시간표</button>
                         <button class="feature-btn" onclick="openModal('mealModal')"><i class="fas fa-utensils" style="color:#fb923c"></i> 급식</button>
@@ -316,7 +302,7 @@
         setInterval(renderFeatures, 500);
 
         // -----------------------------------------------------------
-        // 4. 기타 사유 팝업 (두 창 독립 레이아웃)
+        // 5. 기타 사유 팝업 (두 창 독립 레이아웃)
         // -----------------------------------------------------------
         window.openEtcModal = function(name, lane, callback) {
             const overlay = document.getElementById('custom-modal-overlay');
@@ -329,13 +315,13 @@
             tableBody.innerHTML = '';
             PROJECT_DATA.forEach(d => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td style="font-weight:bold; color:#aaa; padding:8px;">${d.loc}</td><td><button class="table-select-btn">${d.name}</button></td>`;
+                tr.innerHTML = `<td style="font-weight:bold; color:#aaa; padding:10px; border-bottom:1px solid #333;">${d.loc}</td><td style="border-bottom:1px solid #333;"><button class="table-select-btn">${d.name}</button></td>`;
                 tr.querySelector('button').onclick = () => { input.value = `${d.loc} ${d.name}`; input.focus(); };
                 tableBody.appendChild(tr);
             });
 
             const saved = JSON.parse(localStorage.getItem('my_recent_reasons') || '[]');
-            const all = [...saved, '지연귀교', '외출'];
+            const all = [...saved, '조기입실', '외출'];
             recentList.innerHTML = '';
             if(all.length > 0) {
                 recentContainer.style.display = 'block';
@@ -349,7 +335,7 @@
                 const val = input.value.trim();
                 if(val) {
                     let list = JSON.parse(localStorage.getItem('my_recent_reasons') || '[]');
-                    if(!list.includes(val) && !['지연귀교','외출'].includes(val)) { list.unshift(val); if(list.length > 5) list.pop(); localStorage.setItem('my_recent_reasons', JSON.stringify(list)); }
+                    if(!list.includes(val) && !['조기입실','외출'].includes(val)) { list.unshift(val); if(list.length > 5) list.pop(); localStorage.setItem('my_recent_reasons', JSON.stringify(list)); }
                 }
                 overlay.style.display='none'; callback(val); 
             };
@@ -357,7 +343,7 @@
         };
 
         // -----------------------------------------------------------
-        // 5. 눈 효과
+        // 6. 눈 효과
         // -----------------------------------------------------------
         (function() {
             const canvas = document.getElementById('snow-canvas'); const ctx = canvas.getContext('2d');
