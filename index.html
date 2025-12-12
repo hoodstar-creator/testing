@@ -139,7 +139,7 @@
 
     <div id="mealModal" class="modal-overlay">
         <div class="modal-window">
-            <h2 style="color:white; margin:0 0 15px 0;"><i class="fas fa-utensils"></i> 오늘의 급식</h2>
+            <h2 style="color:white; margin:0 0 15px 0;"><i class="fas fa-utensils"></i> 오늘의 점심급식</h2>
             <div id="mealContainer" style="line-height:2.0; color:#ddd; text-align:center; font-size:1.1rem; background:#15171c; padding:25px; border-radius:12px;">로딩 중...</div>
             <button onclick="closeModal('mealModal')" style="margin-top:20px; background:#333; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer; font-weight:700;">닫기</button>
         </div>
@@ -168,12 +168,18 @@
         const TIME_KEY = 'fb54814355634dc9b29c7bb7b7bd028c';
         const BGM_LIST = [
             { title: "Jane Doe (christmas)", cover: "./asset/IMG_0319.jpg", src: "./asset/Jane Doe.mp3" },
-            { title: "잔잔한 피아노", cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100", src: "./assets/piano.mp3" }
+            { title: "노래 신청받아요", cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100", src: "./assets/piano.mp3" }
         ];
         const PROJECT_DATA = [
-            { loc: "본관3층", name: "301호" }, { loc: "본관3층", name: "302호" }, { loc: "신관1층", name: "세미나실" }, { loc: "기숙사", name: "학봉관" }
+            { loc: "본관3층", name: "301호" }, { loc: "본관3층", name: "302호" }, { loc: "본관3층", name: "303호" }, { loc: "본관3층", name: "304호" }, { loc: "본관3층", name: "305호" }, { loc: "본관3층", name: "306호" }, { loc: "본관3층", name: "307호" },
+            { loc: "본관2층", name: "201호" }, { loc: "본관2층", name: "202호" }, { loc: "본관2층", name: "203호" }, { loc: "본관2층", name: "회계실무실" }, { loc: "본관2층", name: "광고콘텐츠실" },
+            { loc: "본관1층", name: "비즈쿨실" }, { loc: "본관1층", name: "보건실" },
+            { loc: "신관1층", name: "세미나실" }, { loc: "신관1층", name: "IoT실" }, { loc: "신관1층", name: "시청각실" }, { loc: "신관1층", name: "휴머노이드실" }, { loc: "신관1층", name: "IT프로젝트실" },
+            { loc: "신관2층", name: "멀티미디어실" }, { loc: "신관2층", name: "크리에이터실" }, { loc: "신관2층", name: "음악실" },
+            { loc: "신관3층", name: "3D실" }, { loc: "신관3층", name: "빅데이터실" },
+            { loc: "기숙사", name: "학봉관/우정학사" }, { loc: "기숙사", name: "미술실" }
         ];
-        const ADMIN_PW = "1202";
+        const ADMIN_PW = "1224";
         let bypassUntil = 0;
         let isSnowActive = true;
 
