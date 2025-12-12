@@ -171,13 +171,14 @@
             { title: "노래 신청받아요", cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100", src: "./assets/piano.mp3" }
         ];
         const PROJECT_DATA = [
-            { loc: "본관3층", name: "301호" }, { loc: "본관3층", name: "302호" }, { loc: "본관3층", name: "303호" }, { loc: "본관3층", name: "304호" }, { loc: "본관3층", name: "305호" }, { loc: "본관3층", name: "306호" }, { loc: "본관3층", name: "307호" },
-            { loc: "본관2층", name: "201호" }, { loc: "본관2층", name: "202호" }, { loc: "본관2층", name: "203호" }, { loc: "본관2층", name: "회계실무실" }, { loc: "본관2층", name: "광고콘텐츠실" },
-            { loc: "본관1층", name: "비즈쿨실" }, { loc: "본관1층", name: "보건실" },
-            { loc: "신관1층", name: "세미나실" }, { loc: "신관1층", name: "IoT실" }, { loc: "신관1층", name: "시청각실" }, { loc: "신관1층", name: "휴머노이드실" }, { loc: "신관1층", name: "IT프로젝트실" },
-            { loc: "신관2층", name: "멀티미디어실" }, { loc: "신관2층", name: "크리에이터실" }, { loc: "신관2층", name: "음악실" },
-            { loc: "신관3층", name: "3D실" }, { loc: "신관3층", name: "빅데이터실" },
-            { loc: "기숙사", name: "학봉관/우정학사" }, { loc: "기숙사", name: "미술실" }
+            { loc: "본관3층", name: "301호" }, { loc: "", name: "302호" }, { loc: "", name: "303호" }, { loc: "", name: "304호" }, { loc: "", name: "305호" }, { loc: "", name: "306호" }, { loc: "", name: "307호" },
+            { loc: "본관2층", name: "201호" }, { loc: "", name: "202호" }, { loc: "", name: "203호" }, { loc: "", name: "회계실무실" }, { loc: "", name: "광고콘텐츠실" },
+            { loc: "본관1층", name: "비즈쿨실" }, { loc: "", name: "보건실" },
+            { loc: "신관1층", name: "세미나실" }, { loc: "", name: "IoT실" }, { loc: "", name: "시청각실" }, { loc: "", name: "휴머노이드실" }, { loc: "", name: "IT프로젝트실" },
+            { loc: "신관2층", name: "멀티미디어실" }, { loc: "", name: "크리에이티브 스튜디오실" }, { loc: "", name: "음악실" },
+            { loc: "신관3층", name: "3D실" }, { loc: "", name: "빅데이터실" },
+            { loc: "신관4층", name: "대강당" },
+            { loc: "기숙사", name: "학봉관/우정학사" }, { loc: "", name: "미술실" }
         ];
         const ADMIN_PW = "1224";
         let bypassUntil = 0;
@@ -321,7 +322,7 @@
             });
 
             const saved = JSON.parse(localStorage.getItem('my_recent_reasons') || '[]');
-            const all = [...saved, '조기입실', '외출'];
+            const all = [...saved, '지연귀교', '외출'];
             recentList.innerHTML = '';
             if(all.length > 0) {
                 recentContainer.style.display = 'block';
@@ -335,7 +336,7 @@
                 const val = input.value.trim();
                 if(val) {
                     let list = JSON.parse(localStorage.getItem('my_recent_reasons') || '[]');
-                    if(!list.includes(val) && !['조기입실','외출'].includes(val)) { list.unshift(val); if(list.length > 5) list.pop(); localStorage.setItem('my_recent_reasons', JSON.stringify(list)); }
+                    if(!list.includes(val) && !['지연귀교','외출'].includes(val)) { list.unshift(val); if(list.length > 5) list.pop(); localStorage.setItem('my_recent_reasons', JSON.stringify(list)); }
                 }
                 overlay.style.display='none'; callback(val); 
             };
