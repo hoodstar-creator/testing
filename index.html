@@ -424,7 +424,7 @@ function checkTimeRestriction() {
     if (day >= 1 && day <= 5) { // 월~금
         const ranges = [
             { s: 850,  e: 1250, m: "오전 수업 시간" }, { s: 1347, e: 1630, m: "오후 수업 시간" },
-            { s: 1708, e: 1835, m: "방과후 시간" }, { s: 1945, e: 2110, m: "야자 1타임" }, { s: 2129, e: 2300, m: "야자 2타임" }
+            { s: 1708, e: 1830, m: "방과후 시간" }, { s: 1945, e: 2105, m: "야자 1타임" }, { s: 2130, e: 2300, m: "야자 2타임" }
         ];
         for (const r of ranges) if (time >= r.s && time <= r.e) return { restricted: true, msg: r.m };
     } else if (day === 0) { // 일요일
