@@ -283,8 +283,8 @@
             aside.querySelector('.notice') && (aside.querySelector('.notice').style.display = 'none');
             if(!document.getElementById('advanced-features-container')) {
                 const div = document.createElement('div'); div.id = 'advanced-features-container';
-                div.innerHTML = `<div class="feature-header" onclick="this.nextElementSibling.classList.toggle('active'); this.querySelector('i').classList.toggle('fa-chevron-right'); this.querySelector('i').classList.toggle('fa-chevron-down');"><span>✨ 더보기</span><i class="fas fa-chevron-right"></i></div>
-                    <div class="feature-list"><div class="weather-box"><i class="fas fa-cloud-sun" style="color:#5ac4ff"></i> 안산 <span style="font-weight:800;color:#fff">2.5°C</span> 맑음</div>
+                div.innerHTML = `<div class="feature-header" onclick="this.nextElementSibling.classList.toggle('active'); this.querySelector('i').classList.toggle('fa-chevron-right'); this.querySelector('i').classList.toggle('fa-chevron-down');"><span더보기</span><i class="fas fa-chevron-right"></i></div>
+                    <div class="feature-list"><div class="weather-box"><i class="fas fa-cloud-sun" style="color:#5ac4ff"></i> 안산 <span style="font-weight:800;color:#fff">error</span> error api</div>
                         <div class="feature-btn" style="justify-content:space-between; cursor:default"><span>❄️ 눈 내리기</span><label class="switch"><input type="checkbox" checked onchange="toggleSnow(this.checked)"><span class="slider"></span></label></div>
                         <button class="feature-btn" onclick="openModal('timetableModal')"><i class="fas fa-calendar-alt" style="color:#4ade80"></i> 시간표</button>
                         <button class="feature-btn" onclick="openModal('mealModal')"><i class="fas fa-utensils" style="color:#fb923c"></i> 급식</button>
