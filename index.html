@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-      /* [1. 기본 효과 및 눈] */
+      /* [1. 기본 설정 및 효과] */
       #snow-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9998; pointer-events: none; }
       .form, .notice, .aside-announcement, ul.notice-ul { display: none !important; }
 
@@ -36,88 +36,74 @@
       input:checked + .slider { background-color: #2563eb; }
       input:checked + .slider:before { transform: translateX(16px); }
 
-      /* ★ BGM 리스트 CSS 수정 및 강화 ★ */
-      #inline-bgm-container { 
-          display: none; margin-top: 8px; background: #15171c !important; 
-          border-radius: 8px; border: 1px solid #444; overflow: hidden; 
-          max-height: 200px; overflow-y: auto;
-      }
+      /* BGM 리스트 */
+      #inline-bgm-container { display: none; margin-top: 8px; background: #15171c !important; border-radius: 8px; border: 1px solid #444; overflow: hidden; max-height: 200px; overflow-y: auto; }
       #inline-bgm-container.active { display: block !important; }
-      .inline-bgm-item { 
-          display: flex !important; align-items: center !important; gap: 12px !important; 
-          padding: 10px !important; border-bottom: 1px solid #222 !important; cursor: pointer; 
-      }
+      .inline-bgm-item { display: flex !important; align-items: center !important; gap: 12px !important; padding: 10px !important; border-bottom: 1px solid #222 !important; cursor: pointer; }
       .inline-bgm-item:hover { background: #252830 !important; }
       .inline-bgm-cover { width: 35px !important; height: 35px !important; border-radius: 4px !important; object-fit: cover; }
-      .inline-bgm-title { font-size: 0.8rem !important; font-weight: bold !important; color: #fff !important; pointer-events: none; }
+      .inline-bgm-title { font-size: 0.8rem !important; font-weight: bold !important; color: #fff !important; }
 
-      /* [3. 미니 플레이어 - 크기 확대 및 디자인] */
+      /* [3. 미니 플레이어] */
       #mini-player {
           position: fixed; bottom: 30px; left: 30px; z-index: 10000;
           display: flex; align-items: center; gap: 15px;
           background: rgba(15, 17, 21, 0.95); padding: 12px 20px 12px 12px;
           border-radius: 60px; border: 1px solid #444;
           box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(10px);
-          transition: all 0.4s; width: auto; min-width: 220px;
-          cursor: pointer; transform: translateY(150%);
+          transition: all 0.4s; width: auto; min-width: 220px; cursor: pointer; transform: translateY(150%);
       }
       #mini-player.active { transform: translateY(0); }
       #mini-player.expanded { border-radius: 25px; padding: 25px; flex-direction: column; max-width: 220px; bottom: 40px; left: 40px; }
-      
-      .vinyl-record { 
-          width: 55px; height: 55px; border-radius: 50%; 
-          background-size: cover; background-position: center; 
-          border: 3px solid #222; animation: spin 4s linear infinite; 
-          animation-play-state: paused; transition: 0.4s;
-          box-shadow: 0 0 15px rgba(0,0,0,0.5);
-      }
+      .vinyl-record { width: 55px; height: 55px; border-radius: 50%; background-size: cover; background-position: center; border: 3px solid #222; animation: spin 4s linear infinite; animation-play-state: paused; transition: 0.4s; box-shadow: 0 0 15px rgba(0,0,0,0.5); }
       #mini-player.expanded .vinyl-record { width: 140px; height: 140px; margin-bottom: 15px; }
       .vinyl-record.playing { animation-play-state: running; }
       @keyframes spin { 100% { transform: rotate(360deg); } }
-      
       .player-info { color: white; display: flex; flex-direction: column; gap: 5px; }
       #mini-player.expanded .player-info { text-align: center; align-items: center; }
       .player-title { font-size: 0.9rem; font-weight: bold; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      #mini-player.expanded .player-title { font-size: 1.1rem; max-width: 180px; white-space: normal; margin-bottom: 15px; }
-
       .player-ctrl-box { display: flex; gap: 20px; align-items: center; }
       .ctrl-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 1.3rem; transition: 0.2s; padding: 5px; }
-      .ctrl-btn:hover { color: #5ac4ff; }
 
-      /* [4. 모달 시스템 고정] */
-      .modal-overlay { 
-          position: fixed !important; top: 0; left: 0; width: 100%; height: 100%; 
-          background: rgba(0, 0, 0, 0.85); z-index: 20000 !important; 
+      /* [4. ★기타 사유 독립 레이아웃 및 CSS 고정★] */
+      .etc-overlay { 
+          position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; 
+          background: rgba(0, 0, 0, 0.8) !important; z-index: 15000 !important; 
           display: none; align-items: center !important; justify-content: center !important; 
-          backdrop-filter: blur(5px); 
+          gap: 40px !important; backdrop-filter: blur(5px) !important; 
       }
-      .modal-window { 
-          background: #1e2025; border: 1px solid #333; border-radius: 16px; 
-          padding: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); 
-          display: flex; flex-direction: column; max-width: 600px; width: 90%; 
+      .window-reason, .window-project { 
+          background: #1e2025 !important; border: 1px solid #333 !important; border-radius: 12px !important; 
+          padding: 25px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.6) !important; 
+          display: flex !important; flex-direction: column !important; max-height: 85vh !important;
       }
-      .timetable-table { width: 100%; border-collapse: collapse; margin-top: 15px; color: #eee; text-align: center; font-size: 0.95rem; }
-      .timetable-table th { background: #2a2d35; padding: 12px; border: 1px solid #444; color: #5ac4ff; }
-      .timetable-table td { padding: 12px; border: 1px solid #333; background: #15171c; }
-
-      /* [5. 기타 사유 독립 레이아웃] */
-      .etc-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 15000; display: none; align-items: center; justify-content: center; gap: 40px; backdrop-filter: blur(5px); animation: fadeIn 0.2s ease; }
-      .window-reason, .window-project { background: #1e2025; border: 1px solid #333; border-radius: 12px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); display: flex; flex-direction: column; max-height: 85vh; }
-      .window-reason { width: 400px; } .window-project { width: 350px; height: 500px; }
+      .window-reason { width: 420px !important; }
+      .window-project { width: 380px !important; height: 520px !important; }
+      .window-title { color: #fff !important; margin: 0 0 20px 0 !important; font-size: 1.3rem !important; font-weight: 700 !important; border-bottom: 1px solid #333 !important; padding-bottom: 15px !important; text-align: center !important; }
       
-      /* ★사유 버튼 새로운 디자인★ */
+      /* 사유 입력창 및 버튼 디자인 */
+      .modal-input { width: 100% !important; padding: 14px !important; border-radius: 8px !important; border: 1px solid #444 !important; background: #2a2d35 !important; color: white !important; font-size: 1.1rem !important; outline: none !important; box-sizing: border-box !important; }
+      .chip-container { display: flex !important; flex-wrap: wrap !important; gap: 10px !important; margin-top: 20px !important; }
       .recent-reason-btn { 
-          background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); 
-          color: #eee; padding: 8px 14px; border-radius: 10px; font-size: 0.85rem; 
-          cursor: pointer; transition: 0.2s; backdrop-filter: blur(5px); margin-bottom: 5px;
+          background: rgba(255, 255, 255, 0.08) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; 
+          color: #eee !important; padding: 8px 14px !important; border-radius: 10px !important; font-size: 0.85rem !important; 
+          cursor: pointer !important; transition: 0.2s !important; backdrop-filter: blur(5px) !important;
       }
-      .recent-reason-btn:hover { background: #2563eb; color: white; border-color: #3b82f6; }
-      .table-select-btn { background: #2563eb; color: white; border: none; padding: 8px 0; border-radius: 6px; cursor: pointer; width: 90%; font-weight: 600; }
+      .recent-reason-btn:hover { background: #2563eb !important; border-color: #3b82f6 !important; color: white !important; }
+
+      .table-container { flex-grow: 1 !important; overflow-y: auto !important; border: 1px solid #333 !important; border-radius: 8px !important; background: #15171c !important; }
+      .project-table { width: 100% !important; border-collapse: collapse !important; text-align: center !important; font-size: 0.95rem !important; color: #aaa !important; }
+      .project-table th { background: #252830 !important; color: #ccc !important; padding: 12px !important; border-bottom: 1px solid #444 !important; position: sticky !important; top: 0 !important; }
+      .project-table td { padding: 10px !important; border-bottom: 1px solid #222 !important; }
+      .table-select-btn { background: #2563eb !important; color: white !important; border: none !important; padding: 8px 0 !important; border-radius: 6px !important; cursor: pointer !important; width: 90% !important; font-weight: 600 !important; }
+
+      /* [5. 시간표/급식 모달 고정] */
+      .modal-overlay { position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; background: rgba(0, 0, 0, 0.85) !important; z-index: 20000 !important; display: none; align-items: center !important; justify-content: center !important; backdrop-filter: blur(5px) !important; }
+      .modal-window { background: #1e2025 !important; border: 1px solid #333 !important; border-radius: 16px !important; padding: 30px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.6) !important; display: flex !important; flex-direction: column !important; max-width: 600px !important; width: 90% !important; }
 
       /* [6. 차단 팝업] */
-      #restriction-popup { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 30000; background: #ef4444; color: white; padding: 15px 25px; border-radius: 12px; display: none; box-shadow: 0 10px 40px rgba(239, 68, 68, 0.4); align-items: center; gap: 15px; animation: slideDown 0.4s ease; }
-      .admin-input { width: 55px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.3); color: white; font-size: 0.8rem; padding: 4px; border-radius: 4px; outline: none; text-align: center; }
-
+      #restriction-popup { position: fixed !important; top: 20px !important; left: 50% !important; transform: translateX(-50%) !important; z-index: 30000 !important; background: #ef4444 !important; color: white !important; padding: 15px 25px !important; border-radius: 12px !important; display: none; box-shadow: 0 10px 40px rgba(239, 68, 68, 0.4) !important; align-items: center !important; gap: 15px !important; animation: slideDown 0.4s ease; }
+      
       @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
       @keyframes slideDown { from { top: -100px; } to { top: 20px; } }
     </style>
@@ -130,19 +116,19 @@
         <div class="window-reason">
             <h3 class="window-title">기타 이동 사유 입력</h3>
             <p style="color:#fff; font-size:0.9rem; margin-bottom:10px; font-weight:600;">📝 사유 입력</p>
-            <input type="text" id="custom-reason-input" class="modal-input" placeholder="사유를 입력하세요" autocomplete="off">
+            <input type="text" id="custom-reason-input" class="modal-input" placeholder="사유를 직접 입력하거나 아래 버튼을 누르세요" autocomplete="off">
             <div id="recent-reasons-container" style="display: none;">
                 <p style="color:#888; font-size:0.75rem; margin:20px 0 8px;">최근 사용 / 고정</p>
-                <div id="recent-reasons-list" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                <div id="recent-reasons-list" class="chip-container"></div>
             </div>
             <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:auto; padding-top:20px;">
-                <button id="modal-btn-cancel" style="background:#333; color:#ccc; border:none; padding:12px 25px; border-radius:10px; cursor:pointer;">취소</button>
-                <button id="modal-btn-save" style="background:#2563eb; color:white; border:none; padding:12px 25px; border-radius:10px; cursor:pointer;">확인</button>
+                <button id="modal-btn-cancel" style="background:#333; color:#ccc; border:none; padding:12px 25px; border-radius:10px; cursor:pointer; font-weight:700;">취소</button>
+                <button id="modal-btn-save" style="background:#2563eb; color:white; border:none; padding:12px 25px; border-radius:10px; cursor:pointer; font-weight:700;">확인</button>
             </div>
         </div>
         <div class="window-project">
             <h3 class="window-title">프로젝트실 목록</h3>
-            <div class="table-container"><table class="project-table" style="width:100%; border-collapse:collapse; text-align:center;"><thead><tr><th style="background:#252830; padding:10px; color:#ccc; border-bottom:1px solid #444;">위치</th><th style="background:#252830; padding:10px; color:#ccc; border-bottom:1px solid #444;">명칭</th></tr></thead><tbody id="project-table-body"></tbody></table></div>
+            <div class="table-container"><table class="project-table"><thead><tr><th width="35%">위치</th><th width="65%">명칭</th></tr></thead><tbody id="project-table-body"></tbody></table></div>
         </div>
     </div>
 
@@ -212,7 +198,7 @@
             try {
                 const res = await fetch(`https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${MEAL_KEY}&Type=json&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530560&MLSV_YMD=${date}`);
                 const data = await res.json();
-                document.getElementById('mealContainer').innerHTML = data.mealServiceDietInfo ? data.mealServiceDietInfo[1].row[0].DDISH_NM.replace(/<br\/>/g, '<br>') : "급식 정보 없음";
+                document.getElementById('mealContainer').innerHTML = data.mealServiceDietInfo ? data.mealServiceDietInfo[1].row[0].DDISH_NM.replace(/<br\/>/g, '<br>') : "오늘은 급식이 없습니다.";
             } catch (e) { document.getElementById('mealContainer').innerHTML = "로드 실패"; }
         }
         async function fetchTimetable() {
@@ -227,7 +213,7 @@
                 const table = res.map(r => r.hisTimetable ? r.hisTimetable[1].row : []);
                 let html = '<table class="timetable-table"><thead><tr><th>교시</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th></tr></thead><tbody>';
                 for(let p=1; p<=7; p++) {
-                    html += `<tr><td>${p}</td>`;
+                    html += `<tr><td style="font-weight:bold">${p}</td>`;
                     for(let i=0; i<5; i++) { html += `<td>${table[i].find(x=>x.PERIO==p)?.ITRT_CNTNT || '-'}</td>`; }
                     html += '</tr>';
                 }
@@ -249,11 +235,8 @@
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
         // -----------------------------------------------------------
-        // 2. BGM 및 안정적인 LP 플레이어 로직
+        // 2. BGM 및 LP 플레이어
         // -----------------------------------------------------------
-        const audio = document.getElementById('bgm-audio');
-        let currentBgmData = null, isPlaying = false;
-
         function checkTime() {
             if (Date.now() < bypassUntil) return { restricted: false };
             const now = new Date(); const t = now.getHours() * 100 + now.getMinutes();
@@ -261,49 +244,38 @@
             for (const r of ranges) if (t >= r.s && t <= r.e) return { restricted: true, msg: r.m };
             return { restricted: false };
         }
-
+        const audio = document.getElementById('bgm-audio'); let isPlaying = false, currentBgmData = null;
         function tryPlayMusic(bgm) {
             const check = checkTime(); if (check.restricted) return showRestriction(check.msg);
             currentBgmData = bgm; audio.src = bgm.src; audio.play(); isPlaying = true; updatePlayerUI();
         }
-
         function handlePlayBtn(e) {
             e.stopPropagation(); if (!currentBgmData) return;
             const check = checkTime(); if (!isPlaying && check.restricted) return showRestriction(check.msg);
-            if(isPlaying) { audio.pause(); document.getElementById('mini-cover').classList.remove('playing'); document.getElementById('play-icon').className='fas fa-play'; }
-            else { audio.play(); document.getElementById('mini-cover').classList.add('playing'); document.getElementById('play-icon').className='fas fa-pause'; }
+            isPlaying ? (audio.pause(), document.getElementById('mini-cover').classList.remove('playing'), document.getElementById('play-icon').className='fas fa-play') : (audio.play(), document.getElementById('mini-cover').classList.add('playing'), document.getElementById('play-icon').className='fas fa-pause');
             isPlaying = !isPlaying;
         }
-
-        function updatePlayerUI() {
-            document.getElementById('mini-player').classList.add('active');
-            document.getElementById('mini-cover').style.backgroundImage = `url('${currentBgmData.cover}')`;
-            document.getElementById('mini-cover').classList.add('playing');
-            document.getElementById('mini-title').innerText = currentBgmData.title;
-            document.getElementById('play-icon').className = 'fas fa-pause';
-        }
-
+        function updatePlayerUI() { document.getElementById('mini-player').classList.add('active'); document.getElementById('mini-cover').style.backgroundImage = `url('${currentBgmData.cover}')`; document.getElementById('mini-cover').classList.add('playing'); document.getElementById('mini-title').innerText = currentBgmData.title; document.getElementById('play-icon').className = 'fas fa-pause'; }
         function stopMusic(e) { e.stopPropagation(); audio.pause(); document.getElementById('mini-player').classList.remove('active', 'expanded'); isPlaying = false; }
         function toggleExpand(e) { if (!e.target.closest('.ctrl-btn')) document.getElementById('mini-player').classList.toggle('expanded'); }
         function showRestriction(msg) { const p = document.getElementById('restriction-popup'); document.getElementById('restriction-msg').innerText = `${msg} 시간입니다.`; p.style.display = 'flex'; setTimeout(() => { p.style.display = 'none'; }, 5000); }
         document.getElementById('admin-pw').oninput = function() { if (this.value === ADMIN_PW) { bypassUntil = Date.now() + 300000; this.value = ""; document.getElementById('restriction-popup').style.background = "#22c55e"; setTimeout(() => { document.getElementById('restriction-popup').style.display = 'none'; document.getElementById('restriction-popup').style.background = "#ef4444"; }, 1000); } };
 
         // -----------------------------------------------------------
-        // 3. 더보기 사이드바 & 눈 효과
+        // 3. 더보기 사이드바 & 눈
         // -----------------------------------------------------------
         function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=document.getElementById('snow-canvas'); const ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height); } }
-        
         function renderFeatures() {
             const aside = document.querySelector('aside'); if(!aside) return;
             aside.querySelector('.notice') && (aside.querySelector('.notice').style.display = 'none');
             if(!document.getElementById('advanced-features-container')) {
                 const div = document.createElement('div'); div.id = 'advanced-features-container';
-                div.innerHTML = `<div class="feature-header" onclick="this.nextElementSibling.classList.toggle('active'); this.querySelector('i').classList.toggle('fa-chevron-right'); this.querySelector('i').classList.toggle('fa-chevron-down');"><span>더보기</span><i class="fas fa-chevron-right"></i></div>
+                div.innerHTML = `<div class="feature-header" onclick="this.nextElementSibling.classList.toggle('active'); this.querySelector('i').classList.toggle('fa-chevron-right'); this.querySelector('i').classList.toggle('fa-chevron-down');"><span>✨ 더보기</span><i class="fas fa-chevron-right"></i></div>
                     <div class="feature-list"><div class="weather-box"><i class="fas fa-cloud-sun" style="color:#5ac4ff"></i> 안산 <span style="font-weight:800;color:#fff">2.5°C</span> 맑음</div>
                         <div class="feature-btn" style="justify-content:space-between; cursor:default"><span>❄️ 눈 내리기</span><label class="switch"><input type="checkbox" checked onchange="toggleSnow(this.checked)"><span class="slider"></span></label></div>
                         <button class="feature-btn" onclick="openModal('timetableModal')"><i class="fas fa-calendar-alt" style="color:#4ade80"></i> 시간표</button>
                         <button class="feature-btn" onclick="openModal('mealModal')"><i class="fas fa-utensils" style="color:#fb923c"></i> 급식</button>
-                        <button class="feature-btn" onclick="document.getElementById('inline-bgm-container').classList.toggle('active')"><i class="fas fa-music"></i> BGM</button>
+                        <button class="feature-btn" onclick="document.getElementById('inline-bgm-container').classList.toggle('active')"><i class="fas fa-music" style="color:#c084fc"></i> BGM</button>
                         <div id="inline-bgm-container"></div></div>`;
                 const stats = aside.querySelector('div'); stats ? aside.insertBefore(div, stats.nextSibling) : aside.appendChild(div);
                 const bgmBox = document.getElementById('inline-bgm-container');
