@@ -98,7 +98,7 @@
     <div id="timetableModal" class="modal-overlay" style="display: none;"><div class="modal-window"><h2 style="color:white; margin-bottom:15px;"><i class="fas fa-calendar-alt"></i> 시간표</h2><div style="display:flex; gap:10px; margin-bottom:15px;"><select id="gradeSelector"></select><select id="classSelector"></select></div><div id="timetableContainer"></div><button onclick="closeModal('timetableModal')" style="margin-top:20px; background:#333; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer;">닫기</button></div></div>
     <div id="mealModal" class="modal-overlay" style="display: none;"><div class="modal-window"><h2 style="color:white; margin-bottom:15px;"><i class="fas fa-utensils"></i> 오늘의 급식</h2><div id="mealContainer" style="line-height:1.8; color:#ddd; text-align:center;"></div><button onclick="closeModal('mealModal')" style="margin-top:20px; background:#333; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer;">닫기</button></div></div>
 
-    <div id="restriction-popup"><input type="password" id="admin-pw" class="admin-input" placeholder="PASS" maxlength="4"><div style="flex:1"><b style="display:block">🚫 재생 불가 시간</b><small id="restriction-msg"></small></div></div>
+    <div id="restriction-popup"><input type="password" id="admin-pw" class="admin-input" placeholder="비밀번호" maxlength="4"><div style="flex:1"><b style="display:block">재생 불가 시간</b><small id="restriction-msg"></small></div></div>
 
     <div id="mini-player" onclick="toggleExpand(event)">
         <div id="mini-cover" class="vinyl-record"></div>
@@ -123,7 +123,7 @@
         const PROJECT_DATA = [
             { loc: "본관3층", name: "301호" }, { loc: "본관3층", name: "302호" }, { loc: "신관1층", name: "세미나실" }, { loc: "기숙사", name: "학봉관" }
         ];
-        const ADMIN_PW = "1202";
+        const ADMIN_PW = "1224";
         let bypassUntil = 0;
         let isSnowActive = true; // 눈 내림 상태 변수
 
@@ -279,12 +279,12 @@
                 tableBody.appendChild(tr);
             });
             const saved = JSON.parse(localStorage.getItem('my_recent_reasons') || '[]');
-            const all = [...saved, '조기입실', '외출'];
+            const all = [...saved, '지연귀교', '외출'];
             recentList.innerHTML = '';
             if(all.length > 0) { recentContainer.style.display = 'block'; all.forEach(txt => { const btn = document.createElement('button'); btn.className = 'recent-reason-btn'; btn.innerText = txt; btn.onclick = () => { input.value = txt; input.focus(); }; recentList.appendChild(btn); }); }
             document.getElementById('modal-btn-save').onclick = () => { 
                 const val = input.value.trim();
-                if(val) { let list = JSON.parse(localStorage.getItem('my_recent_reasons') || '[]'); if(!list.includes(val) && !['조기입실','외출'].includes(val)) { list.unshift(val); if(list.length > 5) list.pop(); localStorage.setItem('my_recent_reasons', JSON.stringify(list)); } }
+                if(val) { let list = JSON.parse(localStorage.getItem('my_recent_reasons') || '[]'); if(!list.includes(val) && !['지연귀교','외출'].includes(val)) { list.unshift(val); if(list.length > 5) list.pop(); localStorage.setItem('my_recent_reasons', JSON.stringify(list)); } }
                 overlay.style.display='none'; callback(val); 
             };
             document.getElementById('modal-btn-cancel').onclick = () => overlay.style.display='none';
