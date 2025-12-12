@@ -188,7 +188,7 @@
             const container = document.getElementById('timetableContainer');
             const grade = document.getElementById('gradeSelector').value;
             const classNum = document.getElementById('classSelector').value;
-            container.innerHTML = '<p style="color:#5ac4ff;">로딩 중...</p>';
+            container.innerHTML = '<p style="color:#5ac4ff;">느려요..잘못만들었어요..</p>';
             const today = new Date();
             const day = today.getDay();
             const diff = today.getDate() - day + (day === 0 ? -6 : 1);
@@ -322,7 +322,7 @@
 
             // 최근 사유 로드 (간단 구현)
             const saved = JSON.parse(localStorage.getItem('my_recent_reasons') || '[]');
-            const all = [...saved, '조기입실', '외출'];
+            const all = [...saved, '지연귀교', '외출'];
             recentList.innerHTML = '';
             if(all.length > 0) {
                 recentContainer.style.display = 'block';
@@ -336,7 +336,7 @@
                 const val = input.value.trim();
                 if(val) {
                     let list = JSON.parse(localStorage.getItem('my_recent_reasons') || '[]');
-                    if(!list.includes(val) && !['조기입실','외출'].includes(val)) { list.unshift(val); if(list.length > 5) list.pop(); localStorage.setItem('my_recent_reasons', JSON.stringify(list)); }
+                    if(!list.includes(val) && !['지연귀교','외출'].includes(val)) { list.unshift(val); if(list.length > 5) list.pop(); localStorage.setItem('my_recent_reasons', JSON.stringify(list)); }
                 }
                 overlay.style.display='none'; callback(val); 
             };
