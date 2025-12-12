@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>학습 장소 현황판</title>
+    
+    <link rel="stylesheet" crossorigin href="./style.css">
+    <script type="module" crossorigin src="./script.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+      /* [1. 눈 내리는 효과] */
+      #snow-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; pointer-events: none; }
+
+      /* [2. 화면 정리] */
+      .form { display: none !important; }
+      .notice, .aside-announcement, ul.notice-ul { display: none !important; }
+
+      /* [3. 고급 기능 사이드바 스타일] */
+      #advanced-features-container {
+          margin-top: 15px; margin-bottom: 20px; padding: 10px;
+          background: rgba(30, 32, 37, 0.6); border-radius: 12px;
+          border: 1px solid #333; animation: fadeIn 0.8s ease;
+      }
+      .feature-header {
+          display: flex; justify-content: space-between; align-items: center;
+          cursor: pointer; padding: 5px 10px; color: #5ac4ff; font-weight: 700;
+          user-select: none;
+      }
+      .feature-header:hover { opacity: 0.8; }
+      
+      /* 처음에는 숨김 상태 */
+      .feature-list {
+          display: none; flex-direction: column; gap: 8px; margin-top: 12px; padding: 0 5px;
+      }
+      .feature-list.active { display: flex; }
+
+      .feature-btn {
+          background: #2a2d35; border: 1px solid #444; color: #e8ecf3;
+          padding: 8px 12px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+          cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px;
+      }
+      .feature-btn:hover { background: #333; border-color: #666; }
+      .feature-btn i { font-size: 0.9rem; width: 15px; }
+
+      /* [4. 인라인 BGM 리스트 (사이드바 내부)] */
+      #inline-bgm-container {
+          display: none; margin-top: 10px; background: #15171c;
+          border-radius: 8px; border: 1px solid #444; overflow: hidden;
+          max-height: 200px; overflow-y: auto;
+      }
+      #inline-bgm-container.active { display: block; }
+      
+      .inline-bgm-item {
+          display: flex; align-items: center; gap: 10px; padding: 8px;
+          border-bottom: 1px solid #222; cursor: pointer;
+      }
+      .inline-bgm-item:hover { background: #252830; }
+      .inline-bgm-cover { width: 30px; height: 30px; border-radius: 4px; object-fit: cover; }
+      .inline-bgm-title { font-size: 0.75rem; font-weight: bold; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .inline-bgm-desc { font-size: 0.65rem; color: #777; }
+
+      /* [5. 미니 플레이어 (LP판)] */
+      #mini-player {
+          position: fixed; bottom: 30px; left: 30px; z-index: 99999;
+          display: flex; align-items: center; gap: 12px;
+          background: rgba(0,0,0,0.85); padding: 6px 15px 6px 6px;
+          border-radius: 50px; border: 1px solid #444;
+          box-shadow: 0 5px 20px rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+          transition: transform 0.3s; transform: translateY(150%);
+      }
+      #mini-player.active { transform: translateY(0); }
+      .vinyl-record {
+          width: 40px; height: 40px; border-radius: 50%;
+          background-size: cover; background-position: center;
+          border: 2px solid #222; animation: spin 4s linear infinite; animation-play-state: paused;
+      }
+      .vinyl-record.playing { animation-play-state: running; }
+      @keyframes spin { 100% { transform: rotate(360deg); } }
+      .player-info { color: white; display: flex; flex-direction: column; }
+      .player-title { font-size: 0.75rem; font-weight: bold; max-width: 100px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .ctrl-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 0.9rem; }
+
+      /* 기존 팝업 디자인 */
+      .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 10000; display: flex; align-items: center; justify-content: center; gap: 40px; backdrop-filter: blur(5px); padding: 20px; box-sizing: border-box; }
+      .window-reason, .window-project { background: #1e2025; border: 1px solid #333; border-radius: 12px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); display: flex; flex-direction: column; max-height: 80vh; }
+      .window-reason { width: 380px; z-index: 2; } .window-project { width: 350px; height: 500px; z-index: 1; }
+      .window-title { color: #fff; margin: 0 0 20px 0; font-size: 1.2rem; font-weight: 700; padding-bottom: 12px; border-bottom: 1px solid #333; text-align: center; }
+      .modal-input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #2a2d35; color: white; font-size: 1rem; outline: none; box-sizing: border-box; }
+      .table-container { flex-grow: 1; overflow-y: auto; border: 1px solid #333; border-radius: 8px; background: #15171c; }
+      .project-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 0.85rem; }
+      .project-table th { background: #252830; color: #ccc; padding: 10px; border-bottom: 1px solid #444; position: sticky; top: 0; z-index: 10; }
+      .project-table td { border-bottom: 1px solid #333; padding: 8px; color: #aaa; }
+      .table-select-btn { background: #2563eb; color: white; border: none; padding: 5px 0; border-radius: 4px; cursor: pointer; font-size: 0.85rem; width: 90%; transition: 0.2s; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+  </head>
+  <body>
+    <canvas id="snow-canvas"></canvas>
+    <div id="app"></div>
+
+    <div id="mini-player">
+        <div id="mini-cover" class="vinyl-record"></div>
+        <div class="player-info">
+            <span id="mini-title" class="player-title">재생 중...</span>
+            <div style="display:flex; gap:12px; margin-top:2px;">
+                <button class="ctrl-btn" onclick="togglePlay()"><i id="play-icon" class="fas fa-play"></i></button>
+                <button class="ctrl-btn" onclick="stopMusic()"><i class="fas fa-stop"></i></button>
+            </div>
+        </div>
+        <audio id="bgm-audio"></audio>
+    </div>
+
+    <div id="custom-modal-overlay" class="modal-overlay" style="display: none;">
+        <div class="window-reason">
+            <h3 class="window-title">기타 이동 사유 입력</h3>
+            <input type="text" id="custom-reason-input" class="modal-input" placeholder="사유 직접 입력" autocomplete="off">
+            <div id="recent-reasons-container" style="display: none;"><p style="color:#888; font-size:0.75rem; margin:15px 0 8px;">최근 사유</p><div id="recent-reasons-list" class="chip-container" style="display:flex; flex-wrap:wrap; gap:5px;"></div></div>
+            <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:auto; padding-top:20px;">
+                <button id="modal-btn-cancel" style="background:#333; color:#ccc; padding:8px 16px; border-radius:6px; border:none; cursor:pointer;">취소</button>
+                <button id="modal-btn-save" style="background:#2563eb; color:white; padding:8px 16px; border-radius:6px; border:none; cursor:pointer;">확인</button>
+            </div>
+        </div>
+        <div class="window-project">
+            <h3 class="window-title">프로젝트실 목록</h3>
+            <div class="table-container">
+                <table class="project-table"><thead><tr><th width="35%">위치</th><th width="65%">명칭</th></tr></thead><tbody id="project-table-body"></tbody></table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // [사용자 설정 BGM 목록 유지]
+        const BGM_LIST = [
+            { title: "Jane Doe (christmas)", desc: "캐롤버전", cover: "./asset/IMG_0319.jpg", src: "./asset/Jane Doe.mp3" },
+            { title: "잔잔한 피아노", desc: "공부할 때 듣는 노래", cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100", src: "./assets/piano.mp3" }
+        ];
+
+        // -----------------------------------------------------------
+        // 1. 고급 기능 사이드바 제어 (처음엔 false로 숨김)
+        // -----------------------------------------------------------
+        let isFeaturesExpanded = false; 
+        let isBgmListVisible = false;
+
+        function toggleFeatures() {
+            isFeaturesExpanded = !isFeaturesExpanded;
+            const list = document.querySelector('.feature-list');
+            const arrow = document.getElementById('feature-arrow');
+            if(isFeaturesExpanded) { list.classList.add('active'); arrow.className = 'fas fa-chevron-down'; }
+            else { list.classList.remove('active'); arrow.className = 'fas fa-chevron-right'; }
+        }
+
+        function toggleBgmPanel() {
+            isBgmListVisible = !isBgmListVisible;
+            const panel = document.getElementById('inline-bgm-container');
+            if(isBgmListVisible) panel.classList.add('active');
+            else panel.classList.remove('active');
+        }
+
+        function renderAdvancedFeatures() {
+            const aside = document.querySelector('aside');
+            if(!aside) return;
+            const ori = aside.querySelector('.notice'); if(ori) ori.style.display='none';
+            
+            if(!document.getElementById('advanced-features-container')) {
+                const div = document.createElement('div');
+                div.id = 'advanced-features-container';
+                div.innerHTML = `
+                    <div class="feature-header" onclick="toggleFeatures()">
+                        <span>더보기</span>
+                        <i id="feature-arrow" class="fas fa-chevron-right"></i>
+                    </div>
+                    <div class="feature-list">
+                        <button class="feature-btn" onclick="alert('🚧 시간표 기능은 개발 중입니다!')"><i class="fas fa-calendar-alt" style="color:#4ade80"></i> 시간표</button>
+                        <button class="feature-btn" onclick="alert('🚧 급식 기능은 개발 중입니다!')"><i class="fas fa-utensils" style="color:#fb923c"></i> 급식</button>
+                        <button class="feature-btn" onclick="toggleBgmPanel()"><i class="fas fa-music" style="color:#c084fc"></i> BGM</button>
+                        <div id="inline-bgm-container"></div>
+                    </div>
+                `;
+                const stats = aside.querySelector('div');
+                if(stats) aside.insertBefore(div, stats.nextSibling);
+                else aside.appendChild(div);
+
+                const bgmBox = document.getElementById('inline-bgm-container');
+                BGM_LIST.forEach(bgm => {
+                    const item = document.createElement('div');
+                    item.className = 'inline-bgm-item';
+                    item.innerHTML = `<img src="${bgm.cover}" class="inline-bgm-cover"><div style="flex:1; overflow:hidden;"><div class="inline-bgm-title">${bgm.title}</div><div class="inline-bgm-desc">${bgm.desc}</div></div>`;
+                    item.onclick = (e) => { e.stopPropagation(); playMusic(bgm); };
+                    bgmBox.appendChild(item);
+                });
+            }
+        }
+        setInterval(renderAdvancedFeatures, 500);
+
+        // -----------------------------------------------------------
+        // 2. 오디오 로직
+        // -----------------------------------------------------------
+        const audio = document.getElementById('bgm-audio');
+        const miniPlayer = document.getElementById('mini-player');
+        const miniCover = document.getElementById('mini-cover');
+        const miniTitle = document.getElementById('mini-title');
+        const playIcon = document.getElementById('play-icon');
+        let isPlaying = false;
+
+        function playMusic(bgm) {
+            audio.src = bgm.src; audio.play(); isPlaying = true;
+            miniPlayer.classList.add('active');
+            miniCover.style.backgroundImage = `url('${bgm.cover}')`;
+            miniCover.classList.add('playing');
+            miniTitle.innerText = bgm.title;
+            playIcon.className = 'fas fa-pause';
+        }
+
+        function togglePlay() {
+            if(isPlaying) { audio.pause(); miniCover.classList.remove('playing'); playIcon.className = 'fas fa-play'; }
+            else { audio.play(); miniCover.classList.add('playing'); playIcon.className = 'fas fa-pause'; }
+            isPlaying = !isPlaying;
+        }
+
+        function stopMusic() { audio.pause(); audio.currentTime = 0; miniPlayer.classList.remove('active'); isPlaying = false; }
+
+        // -----------------------------------------------------------
+        // 3. 눈 효과 & 프로젝트실 (생략 없이 유지)
+        // -----------------------------------------------------------
+        (function() {
+            const canvas = document.getElementById('snow-canvas');
+            const ctx = canvas.getContext('2d');
+            let width = window.innerWidth, height = window.innerHeight;
+            canvas.width = width; canvas.height = height;
+            const flakes = []; let accumulation = 0;
+            for(let i=0;i<100;i++) flakes.push({x:Math.random()*width,y:Math.random()*-height,r:Math.random()*2+1,s:Math.random()+0.5,o:Math.random()*0.5+0.3});
+            function draw() {
+                ctx.clearRect(0,0,width,height);
+                if(accumulation>0){ const g=ctx.createLinearGradient(0,height,0,height-accumulation); g.addColorStop(0,'rgba(255,255,255,0.4)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(0,height-accumulation,width,accumulation); }
+                ctx.fillStyle='rgba(255,255,255,0.8)'; ctx.beginPath();
+                flakes.forEach(f=>{
+                    ctx.globalAlpha=f.o; ctx.moveTo(f.x,f.y); ctx.arc(f.x,f.y,f.r,0,Math.PI*2);
+                    f.y+=f.s; if(f.y>height){ if(accumulation<30 && Math.random()>0.99) accumulation+=0.05; f.y=-5; f.x=Math.random()*width; }
+                }); ctx.fill(); requestAnimationFrame(draw);
+            }
+            window.addEventListener('resize',()=>{width=window.innerWidth;height=window.innerHeight;canvas.width=width;canvas.height=height;}); draw();
+        })();
+
+        const PROJECT_ROOM_DATA = [
+            { loc: "본관3층", name: "301호" }, { loc: "본관3층", name: "302호" }, { loc: "본관3층", name: "303호" }, { loc: "본관3층", name: "304호" }, { loc: "본관3층", name: "305호" }, { loc: "본관3층", name: "306호" }, { loc: "본관3층", name: "307호" },
+            { loc: "본관2층", name: "201호" }, { loc: "본관2층", name: "202호" }, { loc: "본관2층", name: "203호" }, { loc: "본관2층", name: "회계실무실" }, { loc: "본관2층", name: "광고콘텐츠실" },
+            { loc: "본관1층", name: "비즈쿨실" }, { loc: "본관1층", name: "보건실" },
+            { loc: "신관1층", name: "세미나실" }, { loc: "신관1층", name: "IoT실" }, { loc: "신관1층", name: "시청각실" }, { loc: "신관1층", name: "휴머노이드실" }, { loc: "신관1층", name: "IT프로젝트실" },
+            { loc: "신관2층", name: "멀티미디어실" }, { loc: "신관2층", name: "크리에이터실" }, { loc: "신관2층", name: "음악실" },
+            { loc: "신관3층", name: "3D실" }, { loc: "신관3층", name: "빅데이터실" },
+            { loc: "기숙사", name: "학봉관/우정학사" }, { loc: "기숙사", name: "미술실" },
+        ];
+
+        window.openEtcModal = function(studentName, targetLane, callback) {
+            const overlay = document.getElementById('custom-modal-overlay');
+            const input = document.getElementById('custom-reason-input');
+            const tableBody = document.getElementById('project-table-body');
+            input.value = ''; overlay.style.display = 'flex'; input.focus();
+            tableBody.innerHTML = '';
+            PROJECT_ROOM_DATA.forEach(d => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td style="font-weight:bold">${d.loc}</td><td><button class="table-select-btn">${d.name}</button></td>`;
+                tr.querySelector('button').onclick = () => { input.value = `${d.loc} ${d.name}`; input.focus(); };
+                tableBody.appendChild(tr);
+            });
+            document.getElementById('modal-btn-save').onclick = () => { if(!input.value.trim()) return alert("사유 입력!"); overlay.style.display = 'none'; callback(input.value.trim()); };
+            document.getElementById('modal-btn-cancel').onclick = () => overlay.style.display = 'none';
+        };
+    </script>
+  </body>
+</html>
