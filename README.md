@@ -72,6 +72,14 @@ https://open.neis.go.kr/portal/mainPage.do<br>
 https://open-meteo.com/
 ---
 
+## 배경화면 출처 (About Background)
+
+본 배경화면은 (구 프롭모션)동아리의 "디미고 첫학기의 추억" 배경화면입니다. <br>
+https://drive.google.com/drive/folders/17uyKDqK4apAqXFgldcxsfbu-IfU1JVDl?usp=sharing
+
+---
+
+
 ## 설치 및 사용법 (Getting Started)
 
 1. 저장소를 클론합니다.
