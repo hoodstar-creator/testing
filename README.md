@@ -4,5 +4,4 @@
 https://dicon-board.vercel.app<br>
 <br>
 크리스마스 테마에 맞게 제작 변형하였습니다.<br>
-배경구해요...<br>
-음악추천도 받아요...
+
