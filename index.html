@@ -69,7 +69,7 @@
       .ctrl-btn { background: none; border: none; color: #ccc; cursor: pointer; font-size: 1.3rem; transition: 0.2s; padding: 5px; }
 
       /* [4. 시간표 & 급식 모달 - 정렬 수정] */
-      .modal-overlay { position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; background: rgba(0, 0, 0, 0.85) !important; z-index: 20000 !important; display: none; align-items: center !important; justify-content: center !important; backdrop-filter: blur(5px) !important; }
+      .modal-overlay { position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; background: rgba(0, 0, 0, 0.85) !important; z-index: 20000 !important; display: none; align-items: center !important; justify-content: center !important; }
       .modal-window { background: #1e2025 !important; border: 1px solid #333 !important; border-radius: 16px !important; padding: 30px !important; box-shadow: 0 20px 50px rgba(0,0,0,0.6) !important; display: flex !important; flex-direction: column !important; max-width: 650px; width: 90% !important; }
       .timetable-table { width: 100% !important; border-collapse: collapse !important; margin-top: 20px !important; color: #eee !important; text-align: center !important; table-layout: fixed !important; }
       .timetable-table th { background: #2a2d35 !important; padding: 12px 5px !important; border: 1px solid #444 !important; color: #5ac4ff !important; font-size: 0.9rem; }
@@ -235,19 +235,76 @@
         .section, 
         .aside-summary {
             background: rgba(15, 17, 21, 0.0) !important;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(2px);
             -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px; /* topbar의 경우 상단이 둥글어지는 게 싫다면 아래 별도 처리 */
         }
 
-        /* 상단바만 모서리 둥글기 제거 (선택 사항) */
-        .topbar {
-            border-radius: 0 !important;
-            border-top: none !important;
-            border-left: none !important;
-            border-right: none !important;
+
+
+        /* [BGM 리스트 모달 전체 위치 설정] */
+        #bgmListModal {
+            background: rgba(0, 0, 0, 0) !important; /* 배경 어두워지는 효과 제거 */
+            pointer-events: none; /* 배경의 다른 요소(자석 등) 클릭 가능하게 함 */
+            display: none; /* 기본은 숨김 (JS에서 flex로 변경) */
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 25000;
+            justify-content: flex-start !important; /* 왼쪽 정렬 */
+            align-items: flex-end !important;   /* 아래쪽 정렬 */
+            padding-left: 30px;
+            padding-bottom: 10px; /* 미니 플레이어와 겹치지 않게 위로 띄움 */
         }
+
+        /* [BGM 리스트 창 본체] */
+        #bgmListModal .modal-window {
+            pointer-events: auto; /* 리스트 내부 요소는 클릭 가능 */
+            background: rgba(30, 32, 37, 0.95) !important; /* 약간 투명한 다크 모드 */
+            border: 1px solid #555 !important;
+            border-radius: 16px !important;
+            width: 320px !important; /* 너비를 줄여서 자석판 공간 확보 */
+            max-height: 450px !important;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6) !important;
+            margin: 0 !important;
+            padding: 20px !important;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* [BGM 리스트 스크롤 영역] */
+        .bgm-list-scroll {
+            max-height: 280px;
+            overflow-y: auto;
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            border: 1px solid #444;
+        }
+
+        /* [BGM 아이템 행 스타일] */
+        .bgm-item-row {
+            display: flex !important;
+            align-items: center !important;
+            gap: 12px !important;
+            padding: 10px !important;
+            border-bottom: 1px solid #333 !important;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .bgm-item-row:hover { background: rgba(255, 255, 255, 0.08); }
+        .bgm-item-row img { width: 42px !important; height: 42px !important; border-radius: 6px !important; object-fit: cover; }
+        .bgm-item-row span { font-size: 0.9rem !important; color: #ffffff !important; font-weight: 600; }
+
+        /* 전체 무한 재생 버튼 */
+        .loop-btn {
+            background: #3a3a3a !important;
+            color: white !important;
+            width: 100%;
+            margin-bottom: 10px;
+            justify-content: center !important;
+            font-weight: 800 !important;
+        }
+        .loop-btn.active { background: #16a34a !important; }
     </style>
   </head>
   <body>
@@ -322,6 +379,8 @@
         <audio id="bgm-audio"></audio>
     </div>
 
+    
+
 
 
     <script>
@@ -334,28 +393,54 @@ const KMA_KEY = 'nLdG_5HgQ9a3Rv-R4EPWMg'; // 기상청 허브 키
 const ADMIN_PW = "1224";
 
 const BGM_LIST = [
-    { title: "Jane Doe (christmas)", cover: "./asset/IMG_0319.jpg", src: "./asset/Jane Doe.mp3" },
+    { title: "IRIS OUT (testing)", cover: "./asset/irisout_img.png", src: "./asset/irisout.mp3" },
+    { title: "All I want for Christmas (testing)", cover: "./asset/all i want.jpg", src: "./asset/All I Want for Christmas Is You.mp3" },
     { title: "노래 신청받아요", cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100", src: "./assets/piano.mp3" }
 ];
 
 const GALLERY_DATA = [
     { url: "./gallery/24_dicon.png", caption: "봄날 24기디컨" },
+    { url: "./gallery/1765533854112.jpg", caption: "체육대회" },
     { url: "./gallery/bizcool.png", caption: "비즈쿨 Festa!!" },
-    { url: "./gallery/dimigo.png", caption: "디미고" },
+    { url: "./gallery/1752900229515.jpg", caption: "디미고" },
+    { url: "./gallery/1753174727796.jpg", caption: "디미고_2" },
+    { url: "./gallery/20250407_183927.jpg", caption: "디미고_3" },
+    { url: "./gallery/1753167395914.jpg", caption: "디미고_4" },
     { url: "./gallery/eventbg-1.png", caption: "크리스마스배경" },
     { url: "./gallery/winter.jpg", caption: "겨울" },
-    { url: "./gallery/eventbg-1.png", caption: "크리스마스배경" },
-    { url: "./gallery/eventbg-1.png", caption: "크리스마스배경" },
-    { url: "./gallery/eventbg-1.png", caption: "크리스마스배경" },
+    { url: "./gallery/9 (95퍼센트 회색) 회색 단색 배경화면 180303.jpg", caption: "단색_1" },
+    { url: "./gallery/13 (회색 3) 회색 단색 배경화면 180303.png", caption: "단색_2" },
 ];
 
 const PROJECT_DATA = [
-    { loc: "본관3층", name: "301호" }, { loc: "", name: "302호" }, { loc: "", name: "303호" }, { loc: "", name: "304호" }, { loc: "", name: "305호" }, { loc: "", name: "306호" }, { loc: "", name: "307호" },
-    { loc: "본관2층", name: "201호" }, { loc: "", name: "202호" }, { loc: "", name: "203호" }, { loc: "", name: "회계실무실" }, { loc: "", name: "광고콘텐츠실" },
-    { loc: "본관1층", name: "비즈쿨실" }, { loc: "", name: "보건실" },
-    { loc: "신관1층", name: "세미나실" }, { loc: "", name: "IoT실" }, { loc: "", name: "시청각실" }, { loc: "", name: "휴머노이드실" }, { loc: "신관2층", name: "멀티미디어실" },
-    { loc: "신관3층", name: "3D실" }, { loc: "기숙사", name: "학봉관/우정학사" }
-];
+    { loc: "본관3층", name: "301호" },
+    { loc: "", name: "302호" },
+    { loc: "", name: "303호" },
+    { loc: "", name: "304호" },
+    { loc: "", name: "305호" },
+    { loc: "", name: "306호" },
+    { loc: "", name: "307호" },
+    { loc: "본관2층", name: "201호" },
+    { loc: "", name: "202호" },
+    { loc: "", name: "203호" },
+    { loc: "", name: "회계실무실습실" },
+    { loc: "", name: "광고콘텐츠제작실습실" },
+    { loc: "본관1층", name: "비즈쿨실" },
+    { loc: "", name: "보건실" },
+    { loc: "신관1층", name: "세미나실" },
+    { loc: "", name: "사물인터넷실" },
+    { loc: "", name: "시청각실" },
+    { loc: "", name: "휴머노이드실" },
+    { loc: "", name: "IT프로젝트실" },
+    { loc: "신관2층", name: "멀티미디어실" },
+    { loc: "", name: "크리에이티브스튜디오실" },
+    { loc: "", name: "음악실" },
+    { loc: "신관3층", name: "애니메이션콘텐츠제작실 (3D실)" },
+    { loc: "", name: "빅데이터분석실" },
+    { loc: "신관4층", name: "대강당" },
+    { loc: "학봉관/우정학사", name: "기숙사" },
+    { loc: "", name: "미술실" },
+    ];
 
 // 전역 상태 변수
 let isPlaying = false;
@@ -363,52 +448,7 @@ let currentBgmData = null;
 let popupTimer = null;
 let isSnowActive = true;
 
-let lastSnowAutoOffRange = null; // 마지막으로 눈을 자동으로 끈 시간대 기록
-// 특정 시간대 진입 시 눈을 자동으로 끄는 로직
-function checkSnowAutoOff() {
-    const now = new Date();
-    const time = now.getHours() * 100 + now.getMinutes(); // 예: 17:09 -> 1709
-    
-    // 요청하신 자동 꺼짐 시간대 설정
-    const snowOffRanges = [
-        { s: 1709, e: 1835, id: 'afterschool' }, // 5:09분 ~ 6:35분
-        { s: 1945, e: 2110, id: 'night1' },      // 7:45분 ~ 9:10분
-        { s: 2125, e: 2300, id: 'night2' }       // 9:25분 ~ 11:00분
-    ];
 
-    let currentRangeId = null;
-    for (const r of snowOffRanges) {
-        if (time >= r.s && time <= r.e) {
-            currentRangeId = r.id;
-            break;
-        }
-    }
-
-    // 해당 시간대에 진입했고, 아직 이 시간대에서 자동 Off를 실행한 적이 없다면
-    if (currentRangeId && lastSnowAutoOffRange !== currentRangeId) {
-        if (isSnowActive) {
-            // 눈이 켜져있을 때만 작동
-            isSnowActive = false;
-            
-            // 1. 실제 눈 내림 캔버스 멈춤
-            const c = document.getElementById('snow-canvas');
-            if (c) c.getContext('2d').clearRect(0, 0, c.width, c.height);
-
-            // 2. 사이드바의 토글 스위치 UI도 Off 상태로 변경
-            const snowToggle = document.getElementById('snow-toggle');
-            if (snowToggle) snowToggle.checked = false;
-
-            console.log(`[시스템] ${currentRangeId} 시간대가 되어 눈 내림을 자동으로 종료합니다.`);
-        }
-        // 이 시간대에서 이미 실행했음을 기록 (수동으로 다시 켜는 것을 방해하지 않음)
-        lastSnowAutoOffRange = currentRangeId;
-    }
-
-    // 모든 시간대 밖으로 나가면 기록 초기화 (다음 시간대 진입을 위해)
-    if (!currentRangeId) {
-        lastSnowAutoOffRange = null;
-    }
-}
 
 // ==========================================
 // [2] 시간 제한 및 우회 로직
@@ -508,7 +548,9 @@ function renderFeatures() {
             <button class="feature-btn" onclick="openModal('timetableModal')"><i class="fas fa-calendar-alt" style="color:#4ade80"></i> 시간표</button>
             <button class="feature-btn" onclick="openModal('mealModal')"><i class="fas fa-utensils" style="color:#fb923c"></i> 급식</button>
             <button class="feature-btn" onclick="openGallery()"><i class="fas fa-images" style="color:#ff6b6b"></i> 갤러리</button>
-            <button class="feature-btn" onclick="toggleInlineBgm()"><i class="fas fa-music" style="color:#c084fc"></i> BGM</button>
+            <button class="feature-btn" onclick="openModal('bgmListModal')">
+                <i class="fas fa-music"></i> BGM
+            </button>
             <div id="inline-bgm-container"></div>
         </div>`;
     const stats = aside.querySelector('div');
@@ -578,15 +620,37 @@ function viewLargePhoto(url) {
     modal.style.display = 'flex';
 }
 
-// 배경화면 설정 기능
+// [1] 배경화면 설정 및 저장 함수 (수정)
 function setDashboardBackground(url) {
+    // localStorage에 배경 URL 저장
+    localStorage.setItem('dashboard_bg', url);
+
+    // 즉시 적용
+    applyBackground(url);
+
+    alert("적용완료.");
+}
+
+// [2] 실제 배경을 화면에 입히는 보조 함수 (추가)
+function applyBackground(url) {
+    if (!url) return;
+    
+    // 가독성을 위해 어두운 오버레이(linear-gradient)를 함께 적용
     document.body.style.backgroundImage = `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('${url}')`;
     document.body.style.backgroundSize = 'cover';
     document.body.style.backgroundPosition = 'center';
     document.body.style.backgroundAttachment = 'fixed';
-    
-    alert("배경화면이 변경되었습니다");
+    document.body.style.backgroundRepeat = 'no-repeat';
 }
+
+// [3] 페이지 로드 시 저장된 배경 불러오기 (추가)
+// window.onload 부분이나 스크립트 하단에 넣어주세요.
+window.addEventListener('load', () => {
+    const savedBg = localStorage.getItem('dashboard_bg');
+    if (savedBg) {
+        applyBackground(savedBg);
+    }
+});
 
 // ==========================================
 // [5] BGM 및 기타 제어
@@ -636,7 +700,7 @@ function toggleExpand(e) { if (!e.target.closest('.ctrl-btn')) document.getEleme
 
 function showRestrictionPopup(msg, dur) {
     const p = document.getElementById('restriction-popup');
-    document.getElementById('restrict-title').innerText = "🚫 재생 불가 시간";
+    document.getElementById('restrict-title').innerText = "재생 불가 시간";
     document.getElementById('restriction-msg').innerText = `${msg}입니다.`;
     p.style.display = 'flex'; p.style.background = "#ef4444";
     clearTimeout(popupTimer);
@@ -649,7 +713,7 @@ window.onload = () => {
         if (this.value === ADMIN_PW) {
             localStorage.setItem('music_bypass_until', Date.now() + 86400000);
             this.value = ""; document.getElementById('restriction-popup').style.background = "#22c55e";
-            document.getElementById('restrict-title').innerText = "✅ 승인 완료";
+            document.getElementById('restrict-title').innerText = "승인 완료";
             document.getElementById('restriction-msg').innerText = "제한이 해제되었습니다! (24시간)";
             setTimeout(() => { document.getElementById('restriction-popup').style.display = 'none'; }, 2000);
         }
@@ -732,7 +796,7 @@ function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=do
     const canvas = document.getElementById('snow-canvas'); const ctx = canvas.getContext('2d');
     let w = window.innerWidth, h = window.innerHeight; canvas.width = w; canvas.height = h;
     const flakes = []; let acc = 0;
-    for(let i=0; i<100; i++) flakes.push({x:Math.random()*w, y:Math.random()*-h, r:Math.random()*2+1, s:Math.random()+0.5, o:Math.random()*0.5+0.3});
+    for(let i=0; i<80; i++) flakes.push({x:Math.random()*w, y:Math.random()*-h, r:Math.random()*2+1, s:Math.random()+0.5, o:Math.random()*0.5+0.3});
     function draw() {
         if(!isSnowActive) { requestAnimationFrame(draw); return; }
         ctx.clearRect(0,0,w,h);
@@ -743,21 +807,113 @@ function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=do
     }
     window.onresize = () => { w=window.innerWidth; h=window.innerHeight; canvas.width=w; canvas.height=h; }; draw();
 })();
-    </script>
-    <div id="galleryModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 25000; align-items: center; justify-content: center; backdrop-filter: blur(5px);">
-        <div class="modal-window" style="background: #2a2d35; border: 1px solid #444; border-radius: 16px; padding: 30px; width: 90%; max-width: 900px; height: 80vh; display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.5);">
-            <h2 style="color:white; margin:0 0 20px 0; text-align:center;">갤러리</h2>
-            <div id="galleryContainer" class="gallery-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 40px; padding: 20px; overflow-y: auto; flex-grow: 1; background: rgba(0,0,0,0.2); border-radius: 10px;">
-                </div>
-            <button onclick="document.getElementById('galleryModal').style.display='none'" 
-                    style="margin-top:20px; background:#444; color:white; border:none; padding:12px; border-radius:8px; cursor:pointer; font-weight:700;">
-                닫기
-            </button>
-        </div>
-    </div>
 
-    <div id="largePhotoModal" onclick="this.style.display='none'">
-      <img id="largePhotoImg" src="" alt="Large View">
-    </div>
-  </body>
+        // 전역 변수 추가
+        let isInfiniteLoop = false;
+        let currentBgmIndex = 0;
+
+        // [기존 renderFeatures 함수 내 BGM 버튼 수정]
+        // ... BGM 버튼의 onclick을 openModal('bgmListModal')로 변경하세요 ...
+
+        // BGM 리스트 모달 열기 및 렌더링
+        function renderFullBgmList() {
+            const container = document.getElementById('fullBgmList');
+            container.innerHTML = '';
+            
+            BGM_LIST.forEach((bgm, index) => {
+                const row = document.createElement('div');
+                row.className = 'bgm-item-row';
+                row.innerHTML = `
+                    <img src="${bgm.cover}">
+                    <span>${bgm.title}</span>
+                `;
+                row.onclick = () => {
+                    isInfiniteLoop = false; // 직접 선택 시 무한 재생 모드 해제
+                    updateLoopButtonUI();
+                    currentBgmIndex = index;
+                    tryPlayMusic(bgm);
+                    closeModal('bgmListModal');
+                };
+                container.appendChild(row);
+            });
+        }
+
+        // 무한 재생 토글 함수
+        function toggleInfiniteLoop() {
+            isInfiniteLoop = !isInfiniteLoop;
+            
+            if (isInfiniteLoop) {
+                // 이미 노래가 재생 중이라면, 그 곡의 인덱스를 찾아 이어감
+                if (currentBgmData) {
+                    const foundIndex = BGM_LIST.findIndex(b => b.src === currentBgmData.src);
+                    if (foundIndex !== -1) currentBgmIndex = foundIndex;
+                    alert("현재 곡부터 전체 무한 재생 모드가 시작됩니다.");
+                } else {
+                    // 재생 중이 아닐 때만 1번 곡부터 시작
+                    currentBgmIndex = 0;
+                    tryPlayMusic(BGM_LIST[0]);
+                    alert("첫 번째 곡부터 전체 무한 재생이 시작됩니다.");
+                }
+                
+                // [추가] 무한 재생이 켜지면 리스트 창을 자동으로 닫음
+                closeModal('bgmListModal');
+            }
+            
+            updateLoopUI(); // 버튼 색상 및 텍스트 변경
+        }
+
+        function updateLoopButtonUI() {
+            const btn = document.getElementById('loopControlBtn');
+            if (isInfiniteLoop) {
+                btn.classList.add('active');
+                btn.innerHTML = '<i class="fas fa-redo"></i> 전체 무한 재생 ON';
+            } else {
+                btn.classList.remove('active');
+                btn.innerHTML = '<i class="fas fa-redo"></i> 전체 무한 재생 OFF';
+            }
+        }
+
+        // [핵심] 오디오 종료 이벤트 감지
+        document.getElementById('bgm-audio').onended = function() {
+            if (isInfiniteLoop) {
+                // 무한 재생 모드: 다음 곡으로
+                currentBgmIndex++;
+                if (currentBgmIndex >= BGM_LIST.length) currentBgmIndex = 0; // 마지막 곡이면 처음으로
+                tryPlayMusic(BGM_LIST[currentBgmIndex]);
+            } else {
+                // 일반 모드: 플레이어 종료
+                stopMusic(new Event('click')); // 자동으로 플레이어 UI 닫기
+            }
+        };
+
+        // 모달 오픈 시 리스트 렌더링 연결
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+            if (id === 'bgmListModal') renderFullBgmList();
+            // ... 나머지 기존 로직 ...
+        }
+    </script>
+    <div id="galleryModal" class="modal-overlay">
+            <div class="modal-window" style="max-width: 900px; height: 85vh; background: #2a2d35 !important; overflow: hidden;">
+                <h2 style="color:white; margin:0 0 20px 0; text-align:center;"><i class="fas fa-images"></i> 갤러리</h2>
+                <div id="galleryContainer" class="gallery-grid"></div>
+                <button onclick="closeModal('galleryModal')" style="margin-top:20px; background:#333; color:white; border:none; padding:15px; border-radius:10px; cursor:pointer; font-weight:700;">닫기</button>
+            </div>
+        </div>
+
+        <div id="largePhotoModal" class="modal-overlay" style="z-index: 30000;" onclick="this.style.display='none'">
+        <img id="largePhotoImg" src="" style="max-width: 90%; max-height: 90%; border: 5px solid white; border-radius: 4px;">
+        </div>
+
+        <div id="bgmListModal" class="modal-overlay">
+            <div class="modal-window bgm-modal-window">
+                <h2 style="color:white; margin:0 0 15px 0;"><i class="fas fa-music"></i> BGM </h2>
+                <button id="loopControlBtn" class="feature-btn loop-btn" onclick="toggleInfiniteLoop()">
+                    <i class="fas fa-redo"></i> 전체 무한 재생 OFF
+                </button>
+                <div id="fullBgmList" class="bgm-list-scroll"></div>
+                <button onclick="closeModal('bgmListModal')" style="margin-top:20px; background:#333; color:white; border:none; padding:10px; border-radius:8px; cursor:pointer; font-weight:700; width:100%;">닫기</button>
+            </div>
+        </div>
+    </body>
 </html>
