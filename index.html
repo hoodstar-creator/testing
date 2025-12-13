@@ -493,36 +493,94 @@ setInterval(() => {
 // ==========================================
 // [3] API 호출 (급식, 시간표, 날씨)
 // ==========================================
+// [급식 호출]
 async function fetchMeal() {
-    const d = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const container = document.getElementById('mealContainer');
-    container.innerHTML = '<p style="color:#5ac4ff;">급식을 불러오는 중입니다...</p>';
+    if (!container) return;
+
+    container.innerHTML = '<p style="color:#5ac4ff; text-align:center;">오늘의 메뉴를 가져오고 있습니다...</p>';
+
+    // 한국 시간 기준으로 날짜 문자열(YYYYMMDD) 생성
+    const now = new Date();
+    const kst = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Seoul"}));
+    const y = kst.getFullYear();
+    const m = String(kst.getMonth() + 1).padStart(2, '0');
+    const d = String(kst.getDate()).padStart(2, '0');
+    const dateStr = `${y}${m}${d}`;
+
     try {
-        const res = await fetch(`https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${MEAL_KEY}&Type=json&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530560&MLSV_YMD=${d}`);
+        const res = await fetch(`https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${MEAL_KEY}&Type=json&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530560&MLSV_YMD=${dateStr}`);
         const data = await res.json();
-        container.innerHTML = data.mealServiceDietInfo ? data.mealServiceDietInfo[1].row[0].DDISH_NM.replace(/<br\/>/g, '<br>') : "오늘은 급식 정보가 없습니다.";
-    } catch (e) { container.innerHTML = "급식 로드 실패"; }
+        
+        if (data.mealServiceDietInfo && data.mealServiceDietInfo[1] && data.mealServiceDietInfo[1].row) {
+            const menu = data.mealServiceDietInfo[1].row[0].DDISH_NM.replace(/<br\/>/g, '<br>');
+            container.innerHTML = `<div style="text-align:center; padding:10px;">${menu}</div>`;
+        } else {
+            container.innerHTML = "<p style='text-align:center;'>오늘의 급식 정보가 없습니다. 🍱</p>";
+        }
+    } catch (e) {
+        container.innerHTML = "<p style='text-align:center; color:#ef4444;'>급식 정보를 불러오지 못했습니다.</p>";
+    }
 }
 
+// [시간표 호출]
 async function fetchTimetable() {
     const container = document.getElementById('timetableContainer');
-    const grade = document.getElementById('gradeSelector').value;
-    const classNum = document.getElementById('classSelector').value;
-    container.innerHTML = '<p style="color:#5ac4ff;">시간표를 불러오는 중...</p>';
-    const monday = new Date(); monday.setDate(monday.getDate() - (monday.getDay() || 7) + 1);
-    const daysArr = []; for(let i=0; i<5; i++) { let d = new Date(monday); d.setDate(monday.getDate()+i); daysArr.push(d.getFullYear() + ('0'+(d.getMonth()+1)).slice(-2) + ('0'+d.getDate()).slice(-2)); }
+    const gs = document.getElementById('gradeSelector');
+    const cs = document.getElementById('classSelector');
+    
+    if (!container || !gs || !cs) return;
+
+    container.innerHTML = '<p style="color:#5ac4ff; text-align:center; padding:20px;">시간표 정보를 불러오는 중...</p>';
+
+    const grade = gs.value;
+    const classNum = cs.value;
+
+    // 한국 시간 기준으로 이번 주 월요일 계산
+    const now = new Date();
+    const kst = new Date(now.toLocaleString("en-US", {timeZone: "Asia/Seoul"}));
+    const day = kst.getDay(); // 0:일, 1:월...
+    const gapToMonday = (day === 0) ? -6 : 1 - day;
+    
+    const monday = new Date(kst);
+    monday.setDate(kst.getDate() + gapToMonday);
+
+    const daysArr = [];
+    for (let i = 0; i < 5; i++) {
+        const targetDay = new Date(monday);
+        targetDay.setDate(monday.getDate() + i);
+        
+        const y = targetDay.getFullYear();
+        const m = String(targetDay.getMonth() + 1).padStart(2, '0');
+        const d = String(targetDay.getDate()).padStart(2, '0');
+        daysArr.push(`${y}${m}${d}`);
+    }
+
     try {
-        const requests = daysArr.map(d => fetch(`https://open.neis.go.kr/hub/hisTimetable?KEY=${TIME_KEY}&Type=json&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530560&GRADE=${grade}&CLASS_NM=${classNum}&ALL_TI_YMD=${d}`).then(r => r.json()));
+        const requests = daysArr.map(d => 
+            fetch(`https://open.neis.go.kr/hub/hisTimetable?KEY=${TIME_KEY}&Type=json&ATPT_OFCDC_SC_CODE=J10&SD_SCHUL_CODE=7530560&GRADE=${grade}&CLASS_NM=${classNum}&ALL_TI_YMD=${d}`)
+            .then(r => r.json())
+        );
         const results = await Promise.all(requests);
-        const tableData = results.map(r => r.hisTimetable ? r.hisTimetable[1].row : []);
+        const tableData = results.map(r => (r.hisTimetable && r.hisTimetable[1].row ? r.hisTimetable[1].row : []));
+        
         let html = '<table class="timetable-table"><thead><tr><th style="width:15%">교시</th><th>월</th><th>화</th><th>수</th><th>목</th><th>금</th></tr></thead><tbody>';
-        for(let p=1; p<=7; p++) {
+        for (let p = 1; p <= 7; p++) {
             html += `<tr><td style="font-weight:bold; color:#5ac4ff;">${p}</td>`;
-            for(let i=0; i<5; i++) html += `<td>${tableData[i].find(x=>x.PERIO==p)?.ITRT_CNTNT || '-'}</td>`;
+            for (let i = 0; i < 5; i++) {
+                const dayData = tableData[i];
+                const subject = dayData.find(x => x.PERIO == p)?.ITRT_CNTNT || '-';
+                html += `<td>${subject}</td>`;
+            }
             html += '</tr>';
         }
         container.innerHTML = html + '</tbody></table>';
-    } catch(e) { container.innerHTML = "시간표 로드 실패"; }
+        
+        localStorage.setItem('last_grade', grade);
+        localStorage.setItem('last_class', classNum);
+    } catch (e) {
+        container.innerHTML = '<p style="color:#ef4444; text-align:center;">시간표 로드 실패</p>';
+    }
 }
 
 // ==========================================
@@ -567,23 +625,41 @@ function handleFeatureHeaderClick(header) {
     icon.className = list.classList.contains('active') ? 'fas fa-chevron-down' : 'fas fa-chevron-right';
 }
 
+// [모달 열기 함수 - 가장 안정적인 버전]
 function openModal(id) {
-    document.getElementById(id).style.display = 'flex';
-    if (id === 'timetableModal') {
+    const modal = document.getElementById(id);
+    if (!modal) return;
+    
+    modal.style.display = 'flex';
+
+    if (id === 'bgmListModal') {
+        // BGM 모달을 열 때 리스트를 그리는 함수를 강제로 호출
+        renderFullBgmList(); 
+    } 
+    else if (id === 'timetableModal') {
+        // ... 기존 시간표 로직 ...
         const gs = document.getElementById('gradeSelector');
         const cs = document.getElementById('classSelector');
-        if (gs.options.length === 0) {
+        if (gs && gs.options.length === 0) {
             for (let i = 1; i <= 3; i++) gs.add(new Option(i + '학년', i));
             for (let i = 1; i <= 6; i++) cs.add(new Option(i + '반', i));
             gs.value = localStorage.getItem('last_grade') || '1';
             cs.value = localStorage.getItem('last_class') || '2';
-            gs.onchange = fetchTimetable; cs.onchange = fetchTimetable;
+            gs.onchange = fetchTimetable;
+            cs.onchange = fetchTimetable;
         }
         fetchTimetable();
-    } else if (id === 'mealModal') fetchMeal();
+    } 
+    else if (id === 'mealModal') {
+        fetchMeal();
+    }
 }
 
-function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+// [모달 닫기 함수]
+function closeModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) modal.style.display = 'none';
+}
 
 // 갤러리 열기 및 렌더링
 function openGallery() {
@@ -886,12 +962,7 @@ function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=do
             }
         };
 
-        // 모달 오픈 시 리스트 렌더링 연결
-        function openModal(id) {
-            document.getElementById(id).style.display = 'flex';
-            if (id === 'bgmListModal') renderFullBgmList();
-            // ... 나머지 기존 로직 ...
-        }
+
     </script>
     <div id="galleryModal" class="modal-overlay">
             <div class="modal-window" style="max-width: 900px; height: 85vh; background: #2a2d35 !important; overflow: hidden;">
