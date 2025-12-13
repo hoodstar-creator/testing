@@ -4,6 +4,7 @@
   <img src="https://img.shields.io/badge/version-1.0.0-blue?style=for-the-badge">
   <img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=for-the-badge">
 </p>
+![badge](https://img.shields.io/badge/DC-24-fff.svg?colorA=777&colorB=ff0080)
 
 <p align="center">
   <b>학생들의 실시간 위치 관리와 학급 필수 정보를 한눈에 제공하는 스마트 대시보드</b><br>
