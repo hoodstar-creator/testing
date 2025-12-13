@@ -84,5 +84,10 @@ https://open-meteo.com/
 
 
 <code>index.html</code> 상단의 변수를 수정하여 커스텀할 수 있습니다. <ul> <li><code>MEAL_KEY</code>: 나이스 급식 API 키</li> <li><code>TIME_KEY</code>: 나이스 시간표 API 키</li> <li><code>ADMIN_PW</code>: 음악 재생 제한 해제 비밀번호 (기본: 1224)</li> </ul> </details> <br>
-#라이선스
-Copyright (c) 2025. This project is for educational and classroom management purposes.
+## ⚖️ License
+
+<p align="left">
+  <img src="https://img.shields.io/github/license/hoodstar-creator/testing?style=flat-square" alt="license">
+</p>
+
+본 프로젝트는 MIT 라이선스 하에 배포됩니다. 누구나 자유롭게 수정 및 배포가 가능합니다.
