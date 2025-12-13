@@ -3,7 +3,6 @@
 <p align="center">
   <img src="https://img.shields.io/badge/version-1.0.0-blue?style=for-the-badge">
   <img src="https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=for-the-badge">
-  <img src="https://dimibadge.vercel.app/api/badge?id=1201&theme=dark" alt="Current Status">
 </p>
 ![badge](https://img.shields.io/badge/DC-24-fff.svg?colorA=777&colorB=ff0080)
 
