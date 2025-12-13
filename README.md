@@ -15,7 +15,7 @@
 ## 📸 미리보기 (Preview)
 
 <p align="center">
-  <img src="./preview_img.png" width="800px" alt="Main Dashboard Screenshot">
+  <img src="https://github.com/hoodstar-creator/testing/blob/main/preview_img.png?raw=true" width="800px" alt="Main Dashboard Screenshot">
 </p>
 
 ---
