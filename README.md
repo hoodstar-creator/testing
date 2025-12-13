@@ -15,7 +15,7 @@
 ## 📸 미리보기 (Preview)
 
 <p align="center">
-  <img src="https://via.placeholder.com/800x450.png?text=Dashboard+Main+Preview" width="800px" alt="Main Dashboard Screenshot">
+  <img src="preview_img.png" width="800px" alt="Main Dashboard Screenshot">
 </p>
 
 ---
