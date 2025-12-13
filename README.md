@@ -17,7 +17,7 @@
 <p align="center">
   <img src="https://github.com/hoodstar-creator/testing/blob/main/preview_img.png?raw=true" width="800px" alt="Main Dashboard Screenshot">
 </p>
-https://dicon-board.vercel.app/
+https://dicon-board.vercel.app/<br>
 ---
 
 ## 주요 기능 (Key Features)
