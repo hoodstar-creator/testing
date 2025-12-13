@@ -12,7 +12,7 @@
 
 ---
 
-## 📸 미리보기 (Preview)
+## 미리보기 (Preview)
 
 <p align="center">
   <img src="https://github.com/hoodstar-creator/testing/blob/main/preview_img.png?raw=true" width="800px" alt="Main Dashboard Screenshot">
@@ -20,10 +20,10 @@
 https://dicon-board.vercel.app/
 ---
 
-## ✨ 주요 기능 (Key Features)
+## 주요 기능 (Key Features)
 
 <details open>
-<summary><b>📍 실시간 위치 관리 (Magnet Board)</b></summary>
+<summary><b> 실시간 위치 관리 (Magnet Board)</b></summary>
 <br>
 <ul>
   <li><b>자석 드래그 앤 드롭</b>: 학생 번호 자석을 이동시켜 실시간 위치(등교, 귀교 등) 표시</li>
@@ -33,7 +33,7 @@ https://dicon-board.vercel.app/
 </details>
 
 <details open>
-<summary><b>🍱 스마트 학급 정보 (Smart Info)</b></summary>
+<summary><b> 스마트 학급 정보 (Smart Info)</b></summary>
 <br>
 <ul>
   <li><b>실시간 날씨</b>: Open-Meteo API를 통해 안산 지역 기온 및 기상 상태 표시</li>
@@ -43,7 +43,7 @@ https://dicon-board.vercel.app/
 </details>
 
 <details open>
-<summary><b>🎵 멀티미디어 & 감성 (Media & Mood)</b></summary>
+<summary><b> 멀티미디어 & 감성 (Media & Mood)</b></summary>
 <br>
 <ul>
   <li><b>BGM 플레이어</b>: 감성적인 LP판 디자인의 미니 플레이어 및 리스트 모달</li>
@@ -55,7 +55,7 @@ https://dicon-board.vercel.app/
 
 ---
 
-## 🛠 기술 스택 (Tech Stack)
+## 기술 스택 (Tech Stack)
 
 <p align="left">
   <img src="https://img.shields.io/badge/html5-%23E34F26.svg?style=for-the-badge&logo=html5&logoColor=white">
@@ -72,7 +72,7 @@ https://open.neis.go.kr/portal/mainPage.do<br>
 https://open-meteo.com/
 ---
 
-## 🚀 설치 및 사용법 (Getting Started)
+## 설치 및 사용법 (Getting Started)
 
 1. 저장소를 클론합니다.
    ```bash
