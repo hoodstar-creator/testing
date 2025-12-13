@@ -32,7 +32,7 @@
 </ul>
 </details>
 
-<details>
+<details open>
 <summary><b>🍱 스마트 학급 정보 (Smart Info)</b></summary>
 <br>
 <ul>
@@ -42,7 +42,7 @@
 </ul>
 </details>
 
-<details>
+<details open>
 <summary><b>🎵 멀티미디어 & 감성 (Media & Mood)</b></summary>
 <br>
 <ul>
@@ -80,7 +80,7 @@ https://open-meteo.com/
    
 2. 별도의 빌드 과정 없이 index.html을 브라우저로 실행하면 즉시 사용 가능합니다.
 
-<details> <summary><b>⚙️ 설정 가이드 (Configuration)</b></summary>
+<details open> <summary><b>⚙️ 설정 가이드 (Configuration)</b></summary>
 
 
 <code>index.html</code> 상단의 변수를 수정하여 커스텀할 수 있습니다. <ul> <li><code>MEAL_KEY</code>: 나이스 급식 API 키</li> <li><code>TIME_KEY</code>: 나이스 시간표 API 키</li> <li><code>ADMIN_PW</code>: 음악 재생 제한 해제 비밀번호 (기본: 1224)</li> </ul> </details> <br>
