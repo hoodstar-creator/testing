@@ -17,7 +17,7 @@
 <p align="center">
   <img src="https://github.com/hoodstar-creator/testing/blob/main/preview_img.png?raw=true" width="800px" alt="Main Dashboard Screenshot">
 </p>
-
+https://dicon-board.vercel.app/
 ---
 
 ## ✨ 주요 기능 (Key Features)
@@ -86,7 +86,7 @@ https://open-meteo.com/
 <code>index.html</code> 상단의 변수를 수정하여 커스텀할 수 있습니다. <ul> <li><code>MEAL_KEY</code>: 나이스 급식 API 키</li> <li><code>TIME_KEY</code>: 나이스 시간표 API 키</li> <li><code>ADMIN_PW</code>: 음악 재생 제한 해제 비밀번호 (기본: 1224)</li> </ul> </details> <br>
 ## ⚖️ License
 
-Copyright (c) 2025 hoodstar-creator
-(Based on the work of Class 4)
+Copyright (c) 2025 hoodstar-creator<br>
+(Based on the work of Dimigo Class 4)
 
-본 프로젝트는 4반의 소스 코드를 활용하여 제작되었으며, 추가된 모든 기능과 수정 사항은 **MIT 라이선스**를 따릅니다. 자세한 내용은 [공식 라이선스 전문](https://opensource.org/licenses/MIT)을 확인하세요.
+본 프로젝트는 4반의 소스 코드를 활용하여 제작되었으며, 추가된 모든 기능과 수정 사항은 **MIT 라이선스**를 따릅니다. <br>자세한 내용은 [공식 라이선스 전문](https://opensource.org/licenses/MIT)을 확인하세요.
