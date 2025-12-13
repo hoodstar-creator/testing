@@ -67,7 +67,10 @@
 - **Data**: NEIS Open API, Open-Meteo API
 - **Animation**: HTML5 Canvas (Snow Effect)
 - **Storage**: Browser LocalStorage
-
+<br>
+- **공공API목록**: NEIS 공공데이터 (급식, 시간표), Open-Meteo (날씨)<br>
+https://open.neis.go.kr/portal/mainPage.do<br>
+https://open-meteo.com/
 ---
 
 ## 🚀 설치 및 사용법 (Getting Started)
