@@ -583,39 +583,133 @@ async function fetchTimetable() {
     }
 }
 
+
+
+
+
+// [날씨 호출 - Open-Meteo 사용 (인증키 필요없음)]
+async function fetchWeather() {
+    const weatherBox = document.getElementById('weather-display');
+    if (!weatherBox) return;
+
+    try {
+        // 안산시 상록구/단원구 부근 위도, 경도
+        const lat = 37.3217;
+        const lon = 126.8309;
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code`);
+        const data = await res.json();
+
+        if (data && data.current) {
+            const temp = Math.round(data.current.temperature_2m);
+            const code = data.current.weather_code;
+            
+            // WMO Weather interpretation codes (WW) 매핑
+            let status = "맑음";
+            let icon = "fa-sun";
+            let iconColor = "#ffcf4d";
+
+            if (code === 0) { status = "맑음"; icon = "fa-sun"; }
+            else if (code >= 1 && code <= 3) { status = "구름조금"; icon = "fa-cloud-sun"; iconColor = "#ddd"; }
+            else if (code >= 45 && code <= 48) { status = "안개"; icon = "fa-smog"; iconColor = "#aaa"; }
+            else if (code >= 51 && code <= 67) { status = "비"; icon = "fa-cloud-showers-heavy"; iconColor = "#5ac4ff"; }
+            else if (code >= 71 && code <= 77) { status = "눈"; icon = "fa-snowflake"; iconColor = "#fff"; }
+            else if (code >= 80) { status = "소나기"; icon = "fa-cloud-rain"; iconColor = "#5ac4ff"; }
+
+            weatherBox.innerHTML = `
+                <i class="fas ${icon}" style="color:${iconColor}"></i> 안산 
+                <span style="font-weight:800;color:#fff">${temp}°C</span> ${status}
+            `;
+        }
+    } catch (e) {
+        weatherBox.innerHTML = "날씨 정보 로드 실패";
+    }
+}
+
+// 30분마다 날씨 업데이트
+setInterval(fetchWeather, 30 * 60 * 1000);
+
 // ==========================================
 // [4] 메인 UI 렌더링 및 모달 제어
 // ==========================================
 function renderFeatures() {
     const aside = document.querySelector('aside');
+    // aside가 없거나 이미 컨테이너가 생성되었다면 실행하지 않음
     if (!aside || document.getElementById('advanced-features-container')) return;
-    
-    const ori = aside.querySelector('.notice'); if (ori) ori.style.display = 'none';
+
+    // 1. 기존 공지사항 레이아웃 숨기기 (선택 사항)
+    const originalNotice = aside.querySelector('.notice'); 
+    if (originalNotice) originalNotice.style.display = 'none';
+
+    // 2. 새로운 컨테이너 생성
     const div = document.createElement('div');
     div.id = 'advanced-features-container';
+    
+    // 3. 내부 UI 구조 (BGM 인라인 컨테이너 제거됨)
     div.innerHTML = `
         <div class="feature-header" onclick="handleFeatureHeaderClick(this)">
-            <span>더보기</span><i class="fas fa-chevron-right"></i>
+            <span>더보기</span>
+            <i class="fas fa-chevron-right"></i>
         </div>
         <div class="feature-list">
-            <div id="weather-display" class="weather-box">안산 <span style="font-weight:800;color:#fff">2.5°C</span> 맑음</div>
+            <div id="weather-display" class="weather-box">
+                <i class="fas fa-spinner fa-spin"></i> 날씨 로드 중...
+            </div>
+
             <div class="feature-btn" style="justify-content:space-between; cursor:default">
                 <span>❄️ 눈 내리기</span>
-                <label class="switch"><input type="checkbox" checked onchange="toggleSnow(this.checked)"><span class="slider"></span></label>
+                <label class="switch">
+                    <input type="checkbox" id="snow-toggle" checked onchange="toggleSnow(this.checked)">
+                    <span class="slider"></span>
+                </label>
             </div>
-            <button class="feature-btn" onclick="openModal('timetableModal')"><i class="fas fa-calendar-alt" style="color:#4ade80"></i> 시간표</button>
-            <button class="feature-btn" onclick="openModal('mealModal')"><i class="fas fa-utensils" style="color:#fb923c"></i> 급식</button>
-            <button class="feature-btn" onclick="openGallery()"><i class="fas fa-images" style="color:#ff6b6b"></i> 갤러리</button>
-            <button class="feature-btn" onclick="openModal('bgmListModal')">
-                <i class="fas fa-music"></i> BGM
+
+            <button class="feature-btn" onclick="openModal('timetableModal')">
+                <i class="fas fa-calendar-alt" style="color:#4ade80"></i> 시간표
             </button>
-            <div id="inline-bgm-container"></div>
-        </div>`;
+            <button class="feature-btn" onclick="openModal('mealModal')">
+                <i class="fas fa-utensils" style="color:#fb923c"></i> 급식
+            </button>
+            <button class="feature-btn" onclick="openGallery()">
+                <i class="fas fa-images" style="color:#ff6b6b"></i> 갤러리
+            </button>
+            <button class="feature-btn" onclick="openModal('bgmListModal')">
+                <i class="fas fa-music" style="color:#c084fc"></i> BGM 리스트
+            </button>
+        </div>
+    `;
+
+    // 4. 사이드바의 통계창(div) 다음에 삽입
     const stats = aside.querySelector('div');
-    stats ? aside.insertBefore(div, stats.nextSibling) : aside.appendChild(div);
-    renderBgmList();
+    if (stats) {
+        aside.insertBefore(div, stats.nextSibling);
+    } else {
+        aside.appendChild(div);
+    }
+
+    // 5. 생성 직후 날씨 정보 가져오기 호출
+    if (typeof fetchWeather === 'function') {
+        fetchWeather();
+    }
 }
+
+// 0.5초마다 체크 (SPA 환경에서 엘리먼트가 사라졌다 나타날 때를 대비)
 setInterval(renderFeatures, 500);
+
+/**
+ * 더보기 헤더 클릭 이벤트 핸들러
+ */
+function handleFeatureHeaderClick(header) {
+    const list = header.nextElementSibling;
+    const icon = header.querySelector('i');
+    
+    list.classList.toggle('active');
+    
+    if (list.classList.contains('active')) {
+        icon.className = 'fas fa-chevron-down';
+    } else {
+        icon.className = 'fas fa-chevron-right';
+    }
+}
 
 // 보조 함수들 (전역 배치)
 function handleFeatureHeaderClick(header) {
