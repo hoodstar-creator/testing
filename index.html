@@ -305,9 +305,83 @@
             font-weight: 800 !important;
         }
         .loop-btn.active { background: #16a34a !important; }
+
+
+
+        /* [이스터에그: 폭발 효과] */
+        #boom-container {
+            position: fixed; top: 50%; left: 50%; width: 0; height: 0;
+            border-radius: 50%; z-index: 99999; opacity: 0; pointer-events: none;
+            background: radial-gradient(circle, #fff, #ffbd3f, #ff3300, #330000);
+            transform: translate(-50%, -50%);
+        }
+        .exploding-active { animation: boom-sequence 1.2s ease-out forwards; }
+        @keyframes boom-sequence {
+            0% { width: 0; height: 0; opacity: 1; filter: brightness(2); }
+            30% { width: 150vmax; height: 150vmax; opacity: 0.9; }
+            100% { width: 200vmax; height: 200vmax; opacity: 0; }
+        }
+        .shake-screen { animation: shake-hard 0.5s linear; }
+        @keyframes shake-hard { 
+            0%, 100% { transform: translate(0,0); } 
+            25% { transform: translate(-10px, 10px); } 
+            75% { transform: translate(10px, -10px); } 
+        }
+
+        /* [이스터에그: 피 튀김 설정] */
+        #mini-player { overflow: hidden !important; } /* 피가 밖으로 안 나가게 */
+
+        .blood-splat {
+            position: absolute !important; pointer-events: none !important;
+            z-index: 5 !important; opacity: 0;
+        }
+        .splat-animate { animation: splat-hit 0.2s ease-out forwards; }
+        @keyframes splat-hit {
+            0% { transform: scale(0.3) rotate(-20deg); opacity: 0; }
+            100% { transform: scale(1) rotate(0deg); opacity: 0.9; }
+        }
+
+        /* 피 튀길 때 플레이어 스타일 */
+        .blood-stained-container {
+            border-color: #ff0000 !important;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.8) !important;
+        }
+        .blood-stained-container .player-info, 
+        .blood-stained-container .ctrl-btn i {
+            color: #ffcccc !important;
+            text-shadow: 0 0 8px #ff0000;
+        }
+
+
+
+        /* 영상 스타일 */
+        #reze-video {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover; /* 플레이어 크기에 맞게 채움 */
+            z-index: 4; /* 피(5)보다는 뒤, 배경보다는 앞 */
+            border-radius: inherit;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        /* 영상이 활성화되었을 때 노출 */
+        .video-active #reze-video {
+            display: block !important;
+            opacity: 1;
+        }
+
+        /* 영상 재생 중에는 LP판과 커버를 가림 */
+        .video-active .vinyl-record, .video-active #mini-title {
+            opacity: 0;
+            pointer-events: none;
+        }
     </style>
   </head>
   <body>
+    <div id="boom-container"></div>
+
     <canvas id="snow-canvas"></canvas>
     <div id="app"></div>
 
@@ -368,6 +442,13 @@
     </div>
 
     <div id="mini-player" onclick="toggleExpand(event)">
+        <video id="reze-video" 
+            src="./asset/reze_video.mp4" 
+            muted 
+            playsinline 
+            preload="auto"
+            style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; border-radius:inherit; z-index:4;">
+        </video>        
         <div id="mini-cover" class="vinyl-record"></div>
         <div class="player-info">
             <span id="mini-title" class="player-title">노래를 선택하세요</span>
@@ -393,8 +474,8 @@ const KMA_KEY = 'nLdG_5HgQ9a3Rv-R4EPWMg'; // 기상청 허브 키
 const ADMIN_PW = "1224";
 
 const BGM_LIST = [
-    { title: "IRIS OUT (testing)", cover: "./asset/irisout_img.png", src: "./asset/irisout.mp3" },
-    { title: "All I want for Christmas (testing)", cover: "./asset/all i want.jpg", src: "./asset/All I Want for Christmas Is You.mp3" },
+    { title: "IRIS OUT", cover: "./asset/irisout_img.png", src: "./asset/irisout.mp3" },
+    { title: "All I want for Christmas", cover: "./asset/all i want.jpg", src: "./asset/All I Want for Christmas Is You.mp3" },
 ];
 
 const GALLERY_DATA = [
@@ -405,8 +486,8 @@ const GALLERY_DATA = [
     { url: "./gallery/1753174727796.jpg", caption: "디미고_2" },
     { url: "./gallery/20250407_183927.jpg", caption: "디미고_3" },
     { url: "./gallery/1753167395914.jpg", caption: "디미고_4" },
-    { url: "./gallery/Winter_style_PowerPoint_background_purple._9ce52c14-ac0b-4820-a3d7-4d68399b9a94_Image Enhancer.jpg", caption: "겨울" },
-    { url: "./gallery/winter.jpg", caption: "겨울_2" },
+    { url: "./gallery/winter.jpg", caption: "겨울" },
+    { url: "./gallery/Winter_style_PowerPoint_background_purple._9ce52c14-ac0b-4820-a3d7-4d68399b9a94_Image Enhancer.jpg", caption: "겨울_2" },
     { url: "./gallery/9 (95퍼센트 회색) 회색 단색 배경화면 180303.jpg", caption: "단색_1" },
     { url: "./gallery/13 (회색 3) 회색 단색 배경화면 180303.png", caption: "단색_2" },
     { url: "./gallery/eventbg-1.png", caption: "크리스마스배경" },
@@ -1057,6 +1138,160 @@ function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=do
         };
 
 
+
+        // [이스터에그: 레제 - IRIS OUT 전용 확장판]
+        let holdTimer;
+        let isVideoMode = false; // 영상 재생 중인지 확인하는 플래그
+
+        const miniPlayerEl = document.getElementById('mini-player');
+        const boomEl = document.getElementById('boom-container');
+        const audioEl = document.getElementById('bgm-audio');
+        const rezeVideo = document.getElementById('reze-video'); // HTML에 추가해야 함
+
+        const BLOOD_IMAGES = [
+            "./asset/blood_1.png",
+            "./asset/blood_1.png",
+            "./asset/blood_1.png"
+        ];
+
+        // 1. 누르기 시작
+        function startHold(e) {
+            if (!currentBgmData || currentBgmData.title.replace(/\s/g,'').toUpperCase() !== "IRISOUT") return;
+            
+            // 2초간 유지 시 발동
+            holdTimer = setTimeout(() => {
+                triggerRezeBoom();
+            }, 2000);
+        }
+
+        // 2. 누르기 중단
+        function cancelHold() {
+            clearTimeout(holdTimer);
+        }
+
+        // 3. 이벤트 연결
+        miniPlayerEl.addEventListener('mousedown', startHold);
+        miniPlayerEl.addEventListener('touchstart', startHold);
+        window.addEventListener('mouseup', cancelHold);
+        window.addEventListener('touchend', cancelHold);
+
+        // 4. 메인 이스터에그 발동 로직
+        function triggerRezeBoom() {
+            const currentTime = audioEl.currentTime;
+
+            // [하이라이트 구간: 40초 ~ 61초 사이일 때 영상 발동]
+            if (currentTime >= 45 && currentTime <= 61) {
+                runVideoEasterEgg();
+            } else {
+                // 그 외 시간대에는 기존 피 튀김 효과
+                runBloodSplat();
+            }
+        }
+
+        function runVideoEasterEgg() {
+            const video = document.getElementById('reze-video');
+            const audio = document.getElementById('bgm-audio');
+            const player = document.getElementById('mini-player');
+
+            if (!video || !audio) return;
+
+            console.log("🎬 영상 시퀀스 시작 (싱크 보정 적용)");
+            isVideoMode = true;
+
+            // 1. UI 설정 (강제 확장 및 활성화)
+            player.classList.add('expanded');
+            player.classList.add('video-active');
+            video.style.display = 'block';
+
+            // 2. 싱크 계산 (핵심!)
+            // 노래 45초 지점이 영상의 0초가 되도록 계산
+            let targetTime = audio.currentTime - 45;
+
+            // 영상이 시작 범위를 넘지 않도록 안전장치 (0초 미만 방지)
+            video.currentTime = Math.max(0, targetTime);
+
+            // 3. 재생 
+            video.play().then(() => {
+                console.log("레제 영상 싱크 재생 시작");
+            }).catch(error => {
+                video.load();
+                video.currentTime = Math.max(0, targetTime);
+                video.play();
+            });
+
+            // 4. 감시 루프 (싱크 이탈 방지 및 자동 종료)
+            const syncCheck = setInterval(() => {
+                // 종료 조건 (노래 중지, 61초 초과, 영상 모드 해제 시)
+                if (!isPlaying || audio.currentTime > 61 || !isVideoMode) {
+                    stopVideoEasterEgg();
+                    clearInterval(syncCheck);
+                    return;
+                }
+
+                // [중요] 오디오와 영상의 시간이 0.2초 이상 벌어지면 실시간 보정
+                // 기준점: 현재 오디오 시간 - 45초
+                let correctTime = audio.currentTime - 45;
+                if (Math.abs(video.currentTime - correctTime) > 0.2) {
+                    video.currentTime = correctTime;
+                }
+            }, 100); // 더 정밀한 싱크를 위해 0.1초마다 체크
+        }
+
+        function stopVideoEasterEgg() {
+            const video = document.getElementById('reze-video');
+            const player = document.getElementById('mini-player');
+            
+            isVideoMode = false;
+            if (player) player.classList.remove('video-active');
+            if (video) {
+                video.pause();
+                video.style.display = 'none';
+            }
+        }
+
+        // [기존 피 튀김 로직]
+        function runBloodSplat() {
+            boomEl.classList.add('exploding-active');
+            document.body.classList.add('shake-screen');
+            if (navigator.vibrate) navigator.vibrate([500, 100, 500]);
+
+            setTimeout(() => {
+                boomEl.classList.remove('exploding-active');
+                document.body.classList.remove('shake-screen');
+            }, 1200);
+
+            miniPlayerEl.classList.add('blood-stained-container');
+
+            const createSplat = (url, t, l, w, delay) => {
+                setTimeout(() => {
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.className = 'blood-splat splat-animate';
+                    img.style.cssText = `top:${t}; left:${l}; width:${w};`;
+                    miniPlayerEl.appendChild(img);
+                }, delay);
+            };
+
+            createSplat(BLOOD_IMAGES[0], "-10%", "-5%", "70%", 0);
+            createSplat(BLOOD_IMAGES[1], "20%", "40%", "80%", 300);
+            createSplat(BLOOD_IMAGES[2], "10%", "10%", "90%", 600);
+
+            setTimeout(() => {
+                miniPlayerEl.classList.remove('blood-stained-container');
+                const splats = miniPlayerEl.querySelectorAll('.blood-splat');
+                splats.forEach(s => s.remove());
+            }, 20000);
+        }
+
+        // [중요: 기존 toggleExpand 함수가 있다면 수정]
+        function toggleExpand(e) {
+            // 영상 재생 중일 때는 작게 만드는 기능을 막음 (고정)
+            if (isVideoMode) return; 
+            
+            if (!e.target.closest('.ctrl-btn')) {
+                miniPlayerEl.classList.toggle('expanded');
+            }
+        }
     </script>
     <div id="galleryModal" class="modal-overlay">
             <div class="modal-window" style="max-width: 900px; height: 85vh; background: #2a2d35 !important; overflow: hidden;">
