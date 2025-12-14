@@ -1139,131 +1139,118 @@ function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=do
 
 
 
-        // [이스터에그: 레제 - IRIS OUT 전용 확장판]
-        let holdTimer;
-        let isVideoMode = false; // 영상 재생 중인지 확인하는 플래그
-
+        // [이스터에그: 레제 - IRIS OUT 5연타 버전]
+        let clickCount = 0;
+        let lastClickTime = 0;
+        let isVideoMode = false;
+        let videoSyncInterval = null;
+        
         const miniPlayerEl = document.getElementById('mini-player');
         const boomEl = document.getElementById('boom-container');
         const audioEl = document.getElementById('bgm-audio');
-        const rezeVideo = document.getElementById('reze-video'); // HTML에 추가해야 함
-
-        const BLOOD_IMAGES = [
-            "./asset/blood_1.png",
-            "./asset/blood_1.png",
-            "./asset/blood_1.png"
-        ];
-
-        // 1. 누르기 시작
-        function startHold(e) {
-            if (!currentBgmData || currentBgmData.title.replace(/\s/g,'').toUpperCase() !== "IRISOUT") return;
+        const rezeVideo = document.getElementById('reze-video');
+        
+        const REZE_CONFIG = {
+            start: 45,    
+            end: 61,      
+            videoOffset: 45 
+        };
+        
+        // 1. 5연타 감지 함수
+        function handleEasterEggClick(e) {
+            // 특정 버튼(재생, 정지 등)을 누를 때는 카운트하지 않음
+            if (e.target.closest('.ctrl-btn')) return;
+        
+            // 현재 재생 중인 곡이 IRIS OUT인지 확인
+            if (!currentBgmData || currentBgmData.title.replace(/\s/g,'').toUpperCase() !== "IRISOUT") {
+                clickCount = 0;
+                return;
+            }
+        
+            const now = Date.now();
             
-            // 2초간 유지 시 발동
-            holdTimer = setTimeout(() => {
+            // 클릭 간격이 0.8초 이상 벌어지면 카운트 초기화 (연속성 보장)
+            if (now - lastClickTime > 800) {
+                clickCount = 1;
+            } else {
+                clickCount++;
+            }
+            
+            lastClickTime = now;
+        
+            // 5번 연속 터치 성공 시
+            if (clickCount === 5) {
+                console.log("💥 5연타 성공! 폭발 시퀀스 가동");
+                clickCount = 0; // 카운트 초기화
                 triggerRezeBoom();
-            }, 2000);
+            }
         }
-
-        // 2. 누르기 중단
-        function cancelHold() {
-            clearTimeout(holdTimer);
-        }
-
-        // 3. 이벤트 연결
-        miniPlayerEl.addEventListener('mousedown', startHold);
-        miniPlayerEl.addEventListener('touchstart', startHold);
-        window.addEventListener('mouseup', cancelHold);
-        window.addEventListener('touchend', cancelHold);
-
-        // 4. 메인 이스터에그 발동 로직
+        
+        // 2. 이벤트 연결 (기존 mousedown/mouseup/touchstart/touchend 모두 제거 가능)
+        // miniPlayerEl에 직접 클릭 이벤트를 연결합니다.
+        miniPlayerEl.addEventListener('mousedown', handleEasterEggClick);
+        
+        // 3. 메인 이스터에그 실행 로직
         function triggerRezeBoom() {
             const currentTime = audioEl.currentTime;
-
-            // [하이라이트 구간: 40초 ~ 61초 사이일 때 영상 발동]
-            if (currentTime >= 45 && currentTime <= 61) {
+        
+            // 45초 ~ 61초 사이면 영상, 아니면 피 튀김
+            if (currentTime >= REZE_CONFIG.start && currentTime <= REZE_CONFIG.end) {
                 runVideoEasterEgg();
             } else {
-                // 그 외 시간대에는 기존 피 튀김 효과
                 runBloodSplat();
             }
         }
-
+        
+        // [A] 영상 이스터에그 실행 (기존과 동일)
         function runVideoEasterEgg() {
-            const video = document.getElementById('reze-video');
-            const audio = document.getElementById('bgm-audio');
-            const player = document.getElementById('mini-player');
-
-            if (!video || !audio) return;
-
-            console.log("🎬 영상 시퀀스 시작 (싱크 보정 적용)");
+            if (!rezeVideo) return;
             isVideoMode = true;
-
-            // 1. UI 설정 (강제 확장 및 활성화)
-            player.classList.add('expanded');
-            player.classList.add('video-active');
-            video.style.display = 'block';
-
-            // 2. 싱크 계산 (핵심!)
-            // 노래 45초 지점이 영상의 0초가 되도록 계산
-            let targetTime = audio.currentTime - 45;
-
-            // 영상이 시작 범위를 넘지 않도록 안전장치 (0초 미만 방지)
-            video.currentTime = Math.max(0, targetTime);
-
-            // 3. 재생 
-            video.play().then(() => {
-                console.log("레제 영상 싱크 재생 시작");
-            }).catch(error => {
-                video.load();
-                video.currentTime = Math.max(0, targetTime);
-                video.play();
-            });
-
-            // 4. 감시 루프 (싱크 이탈 방지 및 자동 종료)
-            const syncCheck = setInterval(() => {
-                // 종료 조건 (노래 중지, 61초 초과, 영상 모드 해제 시)
-                if (!isPlaying || audio.currentTime > 61 || !isVideoMode) {
+        
+            miniPlayerEl.classList.add('expanded', 'video-active');
+            rezeVideo.style.display = 'block';
+        
+            rezeVideo.currentTime = Math.max(0, audioEl.currentTime - REZE_CONFIG.videoOffset);
+            rezeVideo.play().catch(e => console.error(e));
+        
+            if (videoSyncInterval) clearInterval(videoSyncInterval);
+            videoSyncInterval = setInterval(() => {
+                if (!isPlaying || audioEl.currentTime > REZE_CONFIG.end || !isVideoMode) {
                     stopVideoEasterEgg();
-                    clearInterval(syncCheck);
+                    clearInterval(videoSyncInterval);
                     return;
                 }
-
-                // [중요] 오디오와 영상의 시간이 0.2초 이상 벌어지면 실시간 보정
-                // 기준점: 현재 오디오 시간 - 45초
-                let correctTime = audio.currentTime - 45;
-                if (Math.abs(video.currentTime - correctTime) > 0.2) {
-                    video.currentTime = correctTime;
+                const expected = audioEl.currentTime - REZE_CONFIG.videoOffset;
+                if (Math.abs(rezeVideo.currentTime - expected) > 0.2) {
+                    rezeVideo.currentTime = expected;
                 }
-            }, 100); // 더 정밀한 싱크를 위해 0.1초마다 체크
+            }, 100);
         }
-
+        
         function stopVideoEasterEgg() {
-            const video = document.getElementById('reze-video');
-            const player = document.getElementById('mini-player');
-            
             isVideoMode = false;
-            if (player) player.classList.remove('video-active');
-            if (video) {
-                video.pause();
-                video.style.display = 'none';
+            miniPlayerEl.classList.remove('video-active');
+            if (rezeVideo) {
+                rezeVideo.pause();
+                rezeVideo.style.display = 'none';
             }
         }
-
-        // [기존 피 튀김 로직]
+        
+        // [B] 3단 피 튀김 이스터에그 (기존과 동일)
         function runBloodSplat() {
             boomEl.classList.add('exploding-active');
             document.body.classList.add('shake-screen');
-            if (navigator.vibrate) navigator.vibrate([500, 100, 500]);
-
             setTimeout(() => {
                 boomEl.classList.remove('exploding-active');
                 document.body.classList.remove('shake-screen');
             }, 1200);
-
+        
             miniPlayerEl.classList.add('blood-stained-container');
-
+        
+            const BLOOD_IMAGES = ["./asset/blood_1.png", "./asset/blood_1.png", "./asset/blood_1.png"];
             const createSplat = (url, t, l, w, delay) => {
                 setTimeout(() => {
+                    if (!miniPlayerEl.classList.contains('blood-stained-container')) return;
                     const img = document.createElement('img');
                     img.src = url;
                     img.className = 'blood-splat splat-animate';
@@ -1271,23 +1258,20 @@ function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=do
                     miniPlayerEl.appendChild(img);
                 }, delay);
             };
-
-            createSplat(BLOOD_IMAGES[0], "-10%", "-5%", "70%", 0);
-            createSplat(BLOOD_IMAGES[1], "20%", "40%", "80%", 300);
-            createSplat(BLOOD_IMAGES[2], "10%", "10%", "90%", 600);
-
+        
+            createSplat(BLOOD_IMAGES[0], "-5%", "-10%", "75%", 0);
+            createSplat(BLOOD_IMAGES[1], "30%", "45%", "80%", 300);
+            createSplat(BLOOD_IMAGES[2], "15%", "10%", "95%", 600);
+        
             setTimeout(() => {
                 miniPlayerEl.classList.remove('blood-stained-container');
-                const splats = miniPlayerEl.querySelectorAll('.blood-splat');
-                splats.forEach(s => s.remove());
+                miniPlayerEl.querySelectorAll('.blood-splat').forEach(s => s.remove());
             }, 20000);
         }
-
-        // [중요: 기존 toggleExpand 함수가 있다면 수정]
+        
+        // [중요: 확장 토글 함수는 그대로 유지]
         function toggleExpand(e) {
-            // 영상 재생 중일 때는 작게 만드는 기능을 막음 (고정)
             if (isVideoMode) return; 
-            
             if (!e.target.closest('.ctrl-btn')) {
                 miniPlayerEl.classList.toggle('expanded');
             }
