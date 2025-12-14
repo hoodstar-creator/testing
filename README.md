@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <b>학생들의 실시간 위치 관리와 학급 필수 정보를 한눈에 제공하는 스마트 대시보드</b><br>
+  <b>학생들의 위치 관리와 학급 필수 정보를 한눈에 제공하는 스마트 대시보드</b><br>
   나이스 API 연동 및 다양한 학급 편의 기능을 탑재하고 있습니다.
 </p>
 
@@ -23,7 +23,7 @@ https://dicon-board.vercel.app/<br>
 ## 주요 기능 (Key Features)
 
 <details open>
-<summary><b> 실시간 위치 관리 (Magnet Board)</b></summary>
+<summary><b> 위치 관리 (Magnet Board)</b></summary>
 <br>
 <ul>
   <li><b>자석 드래그 앤 드롭</b>: 학생 번호 자석을 이동시켜 실시간 위치(등교, 귀교 등) 표시</li>
