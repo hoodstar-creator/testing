@@ -1227,7 +1227,7 @@ function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=do
             }
         }
 
-        // [A] 영상 이스터에그 실행 (기존과 동일)
+        // [A] 영상 이스터에그 실행 (성능 최적화 버전)
         function runVideoEasterEgg() {
             if (!rezeVideo) return;
             isVideoMode = true;
@@ -1235,21 +1235,27 @@ function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=do
             miniPlayerEl.classList.add('expanded', 'video-active');
             rezeVideo.style.display = 'block';
 
-            rezeVideo.currentTime = Math.max(0, audioEl.currentTime - REZE_CONFIG.videoOffset);
-            rezeVideo.play().catch(e => console.error(e));
+            // [핵심 수정 1] 시작 시점에 '딱 한 번'만 싱크를 맞춥니다.
+            // 브라우저의 오디오와 비디오 엔진은 보통 오차가 거의 없으므로 한 번만 맞춰도 충분합니다.
+            const startTime = Math.max(0, audioEl.currentTime - REZE_CONFIG.videoOffset);
+            rezeVideo.currentTime = startTime;
 
+            // 비디오 재생
+            rezeVideo.play().catch(e => console.error("비디오 재생 실패:", e));
+
+            // [핵심 수정 2] 0.1초마다 시간을 강제 조정하던 실시간 보정 로직 삭제.
+            // 대신 단순히 "종료 시간"이 되었는지만 체크하는 가벼운 감시기를 돌립니다.
             if (videoSyncInterval) clearInterval(videoSyncInterval);
+            
             videoSyncInterval = setInterval(() => {
+                // 종료 조건: 노래가 멈췄거나, 이스터에그 구간(61초)을 벗어났을 때만 실행
+                // 주기를 100ms -> 500ms로 늘려 부하를 더 줄였습니다.
                 if (!isPlaying || audioEl.currentTime > REZE_CONFIG.end || !isVideoMode) {
                     stopVideoEasterEgg();
                     clearInterval(videoSyncInterval);
-                    return;
+                    videoSyncInterval = null;
                 }
-                const expected = audioEl.currentTime - REZE_CONFIG.videoOffset;
-                if (Math.abs(rezeVideo.currentTime - expected) > 0.2) {
-                    rezeVideo.currentTime = expected;
-                }
-            }, 100);
+            }, 500); 
         }
 
         function stopVideoEasterEgg() {
@@ -1258,6 +1264,7 @@ function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=do
             if (rezeVideo) {
                 rezeVideo.pause();
                 rezeVideo.style.display = 'none';
+                rezeVideo.currentTime = 0; // 다음 실행을 위해 초기화
             }
         }
 
