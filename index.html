@@ -354,28 +354,52 @@
 
 
 
-        /* 영상 스타일 */
+        /* [원형 영상 스타일 - LP판 정중앙 고정] */
         #reze-video {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: cover; /* 플레이어 크기에 맞게 채움 */
-            z-index: 4; /* 피(5)보다는 뒤, 배경보다는 앞 */
-            border-radius: inherit;
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-
-        /* 영상이 활성화되었을 때 노출 */
-        .video-active #reze-video {
-            display: block !important;
-            opacity: 1;
-        }
-
-        /* 영상 재생 중에는 LP판과 커버를 가림 */
-        .video-active .vinyl-record, .video-active #mini-title {
+            position: absolute !important;
+            /* 미니 플레이어 내 LP판(vinyl-record)의 위치와 동일하게 설정 */
+            top: 12px; 
+            left: 12px;
+            width: 55px; 
+            height: 55px;
+            
+            /* [핵심] 원형으로 깎기 */
+            border-radius: 50% !important; 
+            object-fit: cover !important; /* 영상 비율 유지하며 채움 */
+            
+            /* 레이어 순서: LP판보다는 위, 피(splat)보다는 아래 */
+            z-index: 10 !important; 
+            
             opacity: 0;
             pointer-events: none;
+            display: none;
+            
+            /* 확장 시 부드러운 전환 */
+            transition: all 0.4s ease;
+            /* 회전 애니메이션 제거 (LP판은 돌지만 영상은 고정) */
+            animation: none !important; 
+        }
+
+        /* [확장 모드 시 영상 크기/위치 조정] */
+        /* expanded 상태의 .vinyl-record 크기(140px)와 위치에 맞춤 */
+        #mini-player.expanded #reze-video {
+            top: 25px;   /* 확장 모드 내부 패딩에 맞춰 조정 */
+            left: 40px;  /* 확장 모드 중앙 위치에 맞춰 조정 */
+            width: 140px;
+            height: 140px;
+        }
+
+        /* 영상 활성화 상태 */
+        .video-active #reze-video {
+            display: block !important;
+            opacity: 1 !important;
+        }
+
+        /* 영상 재생 중 LP판 디자인 숨기기 (테두리 회전은 유지) */
+        .video-active .vinyl-record {
+            background-image: none !important; /* 기존 커버 이미지 제거 */
+            background-color: #000; /* 배경을 검정으로 하여 영상만 돋보이게 함 */
+            border: 2px solid #ff0000; /* 붉은 테두리 강조 */
         }
     </style>
   </head>
@@ -442,14 +466,15 @@
     </div>
 
     <div id="mini-player" onclick="toggleExpand(event)">
+        <div id="mini-cover" class="vinyl-record"></div>
+
         <video id="reze-video" 
             src="./asset/reze_video.mp4" 
             muted 
             playsinline 
-            preload="auto"
-            style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; border-radius:inherit; z-index:4;">
+            preload="auto">
         </video>        
-        <div id="mini-cover" class="vinyl-record"></div>
+
         <div class="player-info">
             <span id="mini-title" class="player-title">노래를 선택하세요</span>
             <div class="player-ctrl-box">
@@ -1144,29 +1169,29 @@ function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=do
         let lastClickTime = 0;
         let isVideoMode = false;
         let videoSyncInterval = null;
-        
+
         const miniPlayerEl = document.getElementById('mini-player');
         const boomEl = document.getElementById('boom-container');
         const audioEl = document.getElementById('bgm-audio');
         const rezeVideo = document.getElementById('reze-video');
-        
+
         const REZE_CONFIG = {
             start: 45,    
             end: 61,      
             videoOffset: 45 
         };
-        
+
         // 1. 5연타 감지 함수
         function handleEasterEggClick(e) {
             // 특정 버튼(재생, 정지 등)을 누를 때는 카운트하지 않음
             if (e.target.closest('.ctrl-btn')) return;
-        
+
             // 현재 재생 중인 곡이 IRIS OUT인지 확인
             if (!currentBgmData || currentBgmData.title.replace(/\s/g,'').toUpperCase() !== "IRISOUT") {
                 clickCount = 0;
                 return;
             }
-        
+
             const now = Date.now();
             
             // 클릭 간격이 0.8초 이상 벌어지면 카운트 초기화 (연속성 보장)
@@ -1177,7 +1202,7 @@ function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=do
             }
             
             lastClickTime = now;
-        
+
             // 5번 연속 터치 성공 시
             if (clickCount === 5) {
                 console.log("💥 5연타 성공! 폭발 시퀀스 가동");
@@ -1185,15 +1210,15 @@ function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=do
                 triggerRezeBoom();
             }
         }
-        
+
         // 2. 이벤트 연결 (기존 mousedown/mouseup/touchstart/touchend 모두 제거 가능)
         // miniPlayerEl에 직접 클릭 이벤트를 연결합니다.
         miniPlayerEl.addEventListener('mousedown', handleEasterEggClick);
-        
+
         // 3. 메인 이스터에그 실행 로직
         function triggerRezeBoom() {
             const currentTime = audioEl.currentTime;
-        
+
             // 45초 ~ 61초 사이면 영상, 아니면 피 튀김
             if (currentTime >= REZE_CONFIG.start && currentTime <= REZE_CONFIG.end) {
                 runVideoEasterEgg();
@@ -1201,18 +1226,18 @@ function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=do
                 runBloodSplat();
             }
         }
-        
+
         // [A] 영상 이스터에그 실행 (기존과 동일)
         function runVideoEasterEgg() {
             if (!rezeVideo) return;
             isVideoMode = true;
-        
+
             miniPlayerEl.classList.add('expanded', 'video-active');
             rezeVideo.style.display = 'block';
-        
+
             rezeVideo.currentTime = Math.max(0, audioEl.currentTime - REZE_CONFIG.videoOffset);
             rezeVideo.play().catch(e => console.error(e));
-        
+
             if (videoSyncInterval) clearInterval(videoSyncInterval);
             videoSyncInterval = setInterval(() => {
                 if (!isPlaying || audioEl.currentTime > REZE_CONFIG.end || !isVideoMode) {
@@ -1226,7 +1251,7 @@ function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=do
                 }
             }, 100);
         }
-        
+
         function stopVideoEasterEgg() {
             isVideoMode = false;
             miniPlayerEl.classList.remove('video-active');
@@ -1235,7 +1260,7 @@ function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=do
                 rezeVideo.style.display = 'none';
             }
         }
-        
+
         // [B] 3단 피 튀김 이스터에그 (기존과 동일)
         function runBloodSplat() {
             boomEl.classList.add('exploding-active');
@@ -1244,9 +1269,9 @@ function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=do
                 boomEl.classList.remove('exploding-active');
                 document.body.classList.remove('shake-screen');
             }, 1200);
-        
+
             miniPlayerEl.classList.add('blood-stained-container');
-        
+
             const BLOOD_IMAGES = ["./asset/blood_1.png", "./asset/blood_1.png", "./asset/blood_1.png"];
             const createSplat = (url, t, l, w, delay) => {
                 setTimeout(() => {
@@ -1258,17 +1283,17 @@ function toggleSnow(checked) { isSnowActive = checked; if(!checked) { const c=do
                     miniPlayerEl.appendChild(img);
                 }, delay);
             };
-        
+
             createSplat(BLOOD_IMAGES[0], "-5%", "-10%", "75%", 0);
             createSplat(BLOOD_IMAGES[1], "30%", "45%", "80%", 300);
             createSplat(BLOOD_IMAGES[2], "15%", "10%", "95%", 600);
-        
+
             setTimeout(() => {
                 miniPlayerEl.classList.remove('blood-stained-container');
                 miniPlayerEl.querySelectorAll('.blood-splat').forEach(s => s.remove());
             }, 20000);
         }
-        
+
         // [중요: 확장 토글 함수는 그대로 유지]
         function toggleExpand(e) {
             if (isVideoMode) return; 
