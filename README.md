@@ -98,3 +98,4 @@ Copyright (c) 2025 hoodstar-creator<br>
 (Based on the work of Dimigo Class 4)
 
 본 프로젝트는 4반의 소스 코드를 활용하여 제작되었으며, 추가된 모든 기능과 수정 사항은 **MIT 라이선스**를 따릅니다. <br>자세한 내용은 [공식 라이선스 전문](https://opensource.org/licenses/MIT)을 확인하세요.
+<br>README.MD는 제미나이가 작성하였습니다. 참고하시기바랍니다
